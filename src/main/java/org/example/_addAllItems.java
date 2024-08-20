@@ -3,7 +3,7 @@ package org.example;
 import org.json.JSONArray;
 import org.openqa.selenium.WebDriver;
 
-public class AddAllItems {
+public class _addAllItems {
     public static void main(String[] args) {
         String uri = PropertyReader.getProperty("uri");
         String user = PropertyReader.getProperty("user");
@@ -15,8 +15,8 @@ public class AddAllItems {
         mainpage.changeLang("ru");
         LoginPage loginpage = new LoginPage(driver);
         loginpage.performLogin(user,pswd);
-        AddItemsPage itemspage = new AddItemsPage(driver);
-        itemspage.addItems(itemsArray);
+        AddItemsPage itempage = new AddItemsPage(driver);
+        itempage.addItems(itemsArray);
         driver.quit();
     }
 }

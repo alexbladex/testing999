@@ -36,10 +36,10 @@ public class AddItemsPage extends LoggedInPage {
         System.out.println("Submitting items");
         for (int i = 0; i < itemsArray.length(); i++) {
             JSONObject item = itemsArray.getJSONObject(i);
-            form(item);
+            fillingForm(item);
         }
     }
-    private void form(JSONObject data) {
+    private void fillingForm(JSONObject data) {
         String uri = data.getString("url");
         String price = String.valueOf(data.getInt("price"));
         String price_value = data.getString("price_type");

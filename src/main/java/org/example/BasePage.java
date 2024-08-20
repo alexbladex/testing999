@@ -21,6 +21,7 @@ public class BasePage {
     protected Select select;
     By anchor = By.xpath("//h1[@class='mainPage__withDeliveryBlock__title']");
     By frame = By.xpath("//iframe[@id='topbar-panel']");
+    By script_topbar = By.xpath("//script [@id='topbar']");
     By buttonLang = By.xpath("//li[@id='user-language']/button[@class='user-item-btn']");
     By buttonRu = By.xpath("//button[@data-lang='ru']");
     By buttonRo = By.xpath("//button[@data-lang='ro']");
@@ -120,10 +121,11 @@ public class BasePage {
         }
     }
     public void openLoginPage() {
-        wait.until(ExpectedConditions.visibilityOfElementLocated(login));
-        if (Config.debug) System.out.println("login: " + driver.findElement(login).getText());
-        driver.findElement(login).click();
-        wait.until(ExpectedConditions.invisibilityOfElementLocated(login));
+        WebElement loginButton = driver.findElement(login);
+        wait.until(ExpectedConditions.visibilityOf(loginButton));
+        if (Config.debug) System.out.println("login: " + loginButton.getText());
+        loginButton.click();
+        wait.until(ExpectedConditions.invisibilityOf(loginButton));
     }
     public boolean tryHttpRequest(String href) {
         if (!href.startsWith("http")) return true;  // Skip the check for non-HTTP links

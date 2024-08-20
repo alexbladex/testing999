@@ -19,8 +19,8 @@ public class LoggedInPage extends MainPage {
     public void openItems(){
         mouseOver(cabinet);
         wait.until(ExpectedConditions.visibilityOfElementLocated(items)).click();
-        //wait.until(ExpectedConditions.invisibilityOfElementLocated(items));
-        if (Config.debug) System.out.println("Переход на items");
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(items));
+        if (Config.debug) System.out.println("Open items");
     }
     public void logoutPage() {
         wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(frame));
