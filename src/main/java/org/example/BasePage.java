@@ -38,12 +38,8 @@ public class BasePage {
     public enum AddType {
         SELL, BUY
     }
-    public By getAnchor() {
-        return anchor;
-    }
-    public void setAnchor(By anchor) {
-        this.anchor = anchor;
-    }
+    public By getAnchor() { return anchor; }
+    public void setAnchor(By anchor) { this.anchor = anchor; }
     protected void mouseOver(By element) {
         wait.until(ExpectedConditions.visibilityOfElementLocated(element));
         actions.moveToElement(driver.findElement(element)).perform();

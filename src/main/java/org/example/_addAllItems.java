@@ -15,7 +15,7 @@ public class _addAllItems {
         mainpage.changeLang("ru");
         LoginPage loginpage = new LoginPage(driver);
         loginpage.performLogin(user,pswd);
-        AddItemsPage itempage = new AddItemsPage(driver);
+        AddAdPage itempage = new AddAdPage(driver);
         itempage.addItems(itemsArray);
         driver.quit();
     }

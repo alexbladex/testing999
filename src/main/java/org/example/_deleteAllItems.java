@@ -3,13 +3,7 @@ package org.example;
 // Press Shift twice to open the Search Everywhere dialog and type `show whitespaces`,
 // then press Enter. You can now see whitespace characters in your code.
 
-import org.json.JSONArray;
 import org.openqa.selenium.*;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-
-import java.time.Duration;
-import java.util.List;
 
 public class _deleteAllItems {
     public static void main(String[] args) {
@@ -28,7 +22,7 @@ public class _deleteAllItems {
         mainpage.changeLang("ru");
         LoginPage loginpage = new LoginPage(driver);
         loginpage.performLogin(user,pswd);
-        DeleteItemsPage itempage = new DeleteItemsPage(driver);
+        UserItemsPage itempage = new UserItemsPage(driver);
         itempage.delItems(itemsSummary);
         driver.quit();
     }

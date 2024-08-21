@@ -1,9 +1,6 @@
 package org.example;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class LoggedInPage extends MainPage {
@@ -14,7 +11,7 @@ public class LoggedInPage extends MainPage {
     By logoutWin = By.xpath("//a[@class='login__user__buttons__logout']");
     public LoggedInPage(WebDriver driver) {
         super(driver);  // Call MainPage constructor
-        if (Config.debug) System.out.println(driver.getTitle() + " is opened");
+        if (Config.debug) System.out.println(driver.getCurrentUrl() + " is opened");
     }
     public void openItems(){
         mouseOver(cabinet);

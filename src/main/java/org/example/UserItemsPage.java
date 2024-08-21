@@ -1,32 +1,29 @@
 package org.example;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.openqa.selenium.By;
+import org.openqa.selenium.*;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.io.File;
 import java.time.Duration;
 import java.util.List;
 
-public class DeleteItemsPage extends LoggedInPage {
+public class UserItemsPage extends LoggedInPage {
     String summaryTemplate = "//a[contains(text(), '%s')]";
     String itemTemplate = "//input[@value='%s']";
     By page_qty = By.xpath("//nav[@class='paginator cf']/ul/li/a");
     By delete = By.xpath("//a[contains(@class, 'js-multi-delete')]");
     By agree = By.xpath("//button[contains(@data-form-action, 'multiple_remove')]");
+    By anchor = By.xpath("//form/table/tbody[@id='js-cabinet-items-list']");
     String uri = "https://999.md/cabinet/items";
 
-    public DeleteItemsPage(WebDriver driver) {
+    public UserItemsPage(WebDriver driver) {
         super(driver);  // Call MainPage constructor
         wait.until(ExpectedConditions.visibilityOfElementLocated(add_ad));
     }
     public void delItems(String[] itemsArray){
         driver.get(uri);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(anchor));
         for (String itemSummary : itemsArray) {
             System.out.println("Search: " + itemSummary);
             int currentPage = 0;
@@ -73,5 +70,10 @@ public class DeleteItemsPage extends LoggedInPage {
         initializeSelect(dropdown);
         selectByValue(value);
     }
-
+    @Override
+    public By getAnchor() { return anchor; }
+    @Override
+    public void setAnchor(By anchor) {
+        this.anchor = anchor;
+    }
 }

@@ -18,12 +18,12 @@ public class LoginPage extends BasePage {
         if (Config.debug) System.out.println("Prepare to login.");
     }
     public void performLogin(String user, String pswd) {
-        if (isElementPresent(cabinet)) {if (Config.debug) System.out.println("Already logged in");return;}
+        if (isElementPresent(cabinet)) {if (Config.debug) System.out.println("Already logged in"); return;}
         do {
             if (!isElementPresent(loginLogo)) openLoginPage();
             wait.until(ExpectedConditions.visibilityOfElementLocated(loginLogo));
         } while (!loginWin(user, pswd));
-        if (Config.debug) System.out.println("ввели пароль");
+        if (Config.debug) System.out.println("Credential is entered");
     }
     public boolean loginWin(String username, String password) {
         boolean continueLogin = isElementPresent(logContinue);

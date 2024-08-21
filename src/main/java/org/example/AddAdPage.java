@@ -9,7 +9,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.io.File;
 
-public class AddItemsPage extends LoggedInPage {
+public class AddAdPage extends LoggedInPage {
     By items = By.xpath("//a[@href='/cabinet/items']");
     By offer_sell = By.xpath("//input[@value='776' and @type='radio']");
     By offer_buy = By.xpath("//input[@value='777' and @type='radio']");
@@ -26,7 +26,7 @@ public class AddItemsPage extends LoggedInPage {
     By success_h = By.xpath("//a[contains(@href, 'success') and normalize-space()='Пропустить']");
     //переделать чтоб небыло русского или румынского текста
 
-    public AddItemsPage(WebDriver driver) {
+    public AddAdPage(WebDriver driver) {
         super(driver);  // Call MainPage constructor
         wait.until(ExpectedConditions.visibilityOfElementLocated(add_ad));
     }
