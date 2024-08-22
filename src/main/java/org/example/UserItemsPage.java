@@ -21,7 +21,7 @@ public class UserItemsPage extends LoggedInPage {
         super(driver);  // Call MainPage constructor
         wait.until(ExpectedConditions.visibilityOfElementLocated(add_ad));
     }
-    public void delItems(String[] itemsArray){
+    private void delSelectedItems(String[] itemsArray, int item_qty){
         driver.get(uri);
         wait.until(ExpectedConditions.visibilityOfElementLocated(anchor));
         for (String itemSummary : itemsArray) {
@@ -29,6 +29,7 @@ public class UserItemsPage extends LoggedInPage {
             int currentPage = 0;
             List<WebElement> paginators = driver.findElements(page_qty);
             do {
+                if (item_qty == 0) break;
                 paginators.get(currentPage).click();
                 new WebDriverWait(driver, Duration.ofSeconds(2)).until(ExpectedConditions.stalenessOf(paginators.get(currentPage)));
                 System.out.println("Opening next page");
@@ -38,11 +39,14 @@ public class UserItemsPage extends LoggedInPage {
                 ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('style', 'display: none;');", frameElement);
 
                 do {
+                    if (item_qty == 0) break;
                     List<WebElement> itemsForSale = driver.findElements(getSummary(itemSummary));
                     for (WebElement itemForSale : itemsForSale) {
+                        if (item_qty == 0) break;
                         String itemNumber = itemForSale.getAttribute("href").replaceAll("^.*?/ru/", "").replaceAll("\\D+", ""); // https://999.md/ru/87800316
                         System.out.println(itemNumber);
                         new WebDriverWait(driver, Duration.ofSeconds(2)).until(ExpectedConditions.visibilityOfElementLocated(getItem(itemNumber))).click();
+                        item_qty--;
                     }
                     WebElement buttonDelete = driver.findElement(delete);
                     if (buttonDelete.isDisplayed()) {
@@ -59,6 +63,12 @@ public class UserItemsPage extends LoggedInPage {
             } while (currentPage < paginators.size());
         }
         System.out.println("Completed");
+    }
+    public void delAllItems(String[] itemsArray){
+        delSelectedItems(itemsArray, -1); // -1: all
+    }
+    public void delLastItem(String[] itemsArray){
+        delSelectedItems(itemsArray, 1);
     }
     private By getSummary(String itemSummary) {
         return By.xpath(String.format(summaryTemplate, itemSummary));

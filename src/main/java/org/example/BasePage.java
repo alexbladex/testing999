@@ -90,7 +90,7 @@ public class BasePage {
         if (Config.debug) System.out.println("Lang is changed: " + lang);
         driver.switchTo().defaultContent();
     }
-    public boolean isElementPresent(By element) {
+    protected boolean isElementPresent(By element) {
         try {
             driver.findElement(element);
             return true;
@@ -98,7 +98,7 @@ public class BasePage {
             return false;
         }
     }
-    public boolean isElementVisible(By element) {
+    protected boolean isElementVisible(By element) {
         try {
             wait.until(ExpectedConditions.visibilityOfElementLocated(element));
             return true;
@@ -106,10 +106,10 @@ public class BasePage {
             return false;
         }
     }
-    public void initializeSelect(WebElement element) {
+    protected void initializeSelect(WebElement element) {
         this.select = new Select(element);
     }
-    public void selectByValue(String val) {
+    protected void selectByValue(String val) {
         if (this.select != null) {
             this.select.selectByValue(val);
         } else {

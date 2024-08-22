@@ -151,7 +151,7 @@ public class AddAdPage extends LoggedInPage {
             System.out.println(id + " not present");
         }
     }
-    public void selectDropdown(WebElement dropdown, String value) {
+    private void selectDropdown(WebElement dropdown, String value) {
         initializeSelect(dropdown);
         selectByValue(value);
     }
