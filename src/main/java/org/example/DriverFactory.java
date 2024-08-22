@@ -17,6 +17,7 @@ public class DriverFactory {
         return createDriver();
     }
     private static WebDriver createDriver() {
+        //portable chrome name should be chrome.exe otherwise is need setBinary
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--user-data-dir=d:/Program Files/ChromePortable/Data/profile/");
         options.addArguments("--disable-features=WebBluetooth");
