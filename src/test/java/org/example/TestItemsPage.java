@@ -34,7 +34,7 @@ public class TestItemsPage {
     public void testDelLastItem() {
         LoginPage loginpage = new LoginPage(driver);
         loginpage.performLogin(user,pswd);
-        UserItemsPage itempage = new UserItemsPage(driver);
+        CabinetItemsPage itempage = new CabinetItemsPage(driver);
         int adId = itempage.addDefaultAd();
         //String adId = itempage.getIdByTitle(adTitle);
         Assert.assertTrue(itempage.delLastItemById(adId), "Last Item was not deleted");

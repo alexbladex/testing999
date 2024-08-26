@@ -1,16 +1,13 @@
 package org.example;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.openqa.selenium.*;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
 import java.util.List;
 
-public class UserItemsPage extends LoggedInPage {
+public class CabinetItemsPage extends LoggedInPage {
     String summaryTemplate = "//a[contains(text(), '%s')]";
     String itemTemplate = "//input[@value='%s']";
     By page_qty = By.xpath("//nav[@class='paginator cf']/ul/li/a");
@@ -19,12 +16,12 @@ public class UserItemsPage extends LoggedInPage {
     By anchor = By.xpath("//form/table/tbody[@id='js-cabinet-items-list']");
     String uri = "https://999.md/cabinet/items";
 
-    public UserItemsPage(WebDriver driver) {
+    public CabinetItemsPage(WebDriver driver) {
         super(driver);  // Call MainPage constructor
         wait.until(ExpectedConditions.visibilityOfElementLocated(add_ad));
     }
     private void delSelectedItems(String[] itemsArray, int item_qty){
-        driver.get(uri);
+        if (!driver.getCurrentUrl().contains("items")) driver.get(uri);
         wait.until(ExpectedConditions.visibilityOfElementLocated(anchor));
         for (String itemSummary : itemsArray) {
             System.out.println("Search: " + itemSummary);
@@ -33,7 +30,7 @@ public class UserItemsPage extends LoggedInPage {
             do {
                 if (item_qty == 0) break;
                 paginators.get(currentPage).click();
-                new WebDriverWait(driver, Duration.ofSeconds(2)).until(ExpectedConditions.stalenessOf(paginators.get(currentPage)));
+                wait.until(ExpectedConditions.stalenessOf(paginators.get(currentPage)));
                 System.out.println("Opening next page");
                 WebElement frameElement = driver.findElement(frame);
                 ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('style', 'display:none');", frameElement);
@@ -45,11 +42,10 @@ public class UserItemsPage extends LoggedInPage {
                     List<WebElement> itemsForSale = driver.findElements(getSummary(itemSummary));
                     for (WebElement itemForSale : itemsForSale) {
                         if (item_qty == 0) break;
-                        System.out.println(itemForSale.getAttribute("href"));
                         //String itemNumber = itemForSale.getAttribute("href").replaceAll("^.*?/ru/", "").replaceAll("\\D+", ""); // https://999.md/ru/87800316
-                        String itemNumber = itemForSale.getAttribute("href").replaceAll("^.*?md.*?(\\d+).*$", "$1"); // https://999.md/ru/87800316
+                        String itemNumber = itemForSale.getAttribute("href").replaceAll("^.*?md.*?(\\d+).*$", "$1");
                         System.out.println(itemNumber);
-                        new WebDriverWait(driver, Duration.ofSeconds(2)).until(ExpectedConditions.visibilityOfElementLocated(getItem(itemNumber))).click();
+                        wait.until(ExpectedConditions.visibilityOfElementLocated(getItem(itemNumber))).click();
                         item_qty--;
                     }
                     performDelete();
@@ -69,18 +65,18 @@ public class UserItemsPage extends LoggedInPage {
             buttonDelete.click();
             WebElement agreeDelete = driver.findElement(agree);
             agreeDelete.click();
-            new WebDriverWait(driver, Duration.ofSeconds(2)).until(ExpectedConditions.invisibilityOf(buttonDelete));
-            System.out.println("items deleted");
+            wait.until(ExpectedConditions.invisibilityOf(buttonDelete));
+            System.out.println("deleted.");
             return true;
         }
-        System.out.println("items are not deleted");
+        System.out.println("are not deleted.");
         return false;
     }
     public void delAllItems(String[] titleArray){
         delSelectedItems(titleArray, -1); // -1: all
     }
-    public void delLastItem(String[] title){
-        delSelectedItems(title, 1); // last
+    public void delLastItems(String[] titles){
+        delSelectedItems(titles, 1); // last of each
     }
     public void delAllItems(String title){
         delSelectedItems(new String[]{title}, -1); // -1: all
@@ -89,8 +85,9 @@ public class UserItemsPage extends LoggedInPage {
         delSelectedItems(new String[]{title}, 1); // last
     }
     public boolean delLastItemById(Integer id){
-        driver.get(uri);
-        new WebDriverWait(driver, Duration.ofSeconds(2)).until(ExpectedConditions.visibilityOfElementLocated(getItem(id.toString()))).click();
+        if (!driver.getCurrentUrl().contains("items")) driver.get(uri);
+        System.out.println(id);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(getItem(id.toString()))).click();
         return performDelete();
     }
     private By getSummary(String itemSummary) {
@@ -98,6 +95,14 @@ public class UserItemsPage extends LoggedInPage {
     }
     private By getItem(String itemNumber) {
         return By.xpath(String.format(itemTemplate, itemNumber));
+    }
+    public String getIdByTitle(String title) {
+        if (!driver.getCurrentUrl().contains("items")) driver.get(uri);
+        List<WebElement> elements = driver.findElements(getSummary(title));
+        if (elements.isEmpty()) return null;
+        WebElement itemForSale = elements.get(0);
+        return itemForSale.getAttribute("href")
+                .replaceAll("^.*?md.*?(\\d+).*$", "$1"); //String OR Integer???
     }
     public Integer addDefaultAd() {
         String json = "{\n" +
@@ -115,16 +120,8 @@ public class UserItemsPage extends LoggedInPage {
                 "}";
         JSONObject jsonObject = new JSONObject(json);
         AddAdPage itempage = new AddAdPage(driver);
-        int id = itempage.fillingForm(jsonObject);
+        int id = itempage.submittingForm(jsonObject);
         return (id > 0) ? id : null;
-    }
-    public String getIdByTitle(String title) {
-        driver.get(uri);
-        List<WebElement> elements = driver.findElements(getSummary(title));
-        if (elements.isEmpty()) return null;
-        WebElement itemForSale = elements.get(0);
-        return itemForSale.getAttribute("href")
-                .replaceAll("^.*?md.*?(\\d+).*$", "$1");
     }
     public void selectDropdown(WebElement dropdown, String value) {
         initializeSelect(dropdown);

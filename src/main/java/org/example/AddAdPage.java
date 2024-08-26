@@ -40,11 +40,11 @@ public class AddAdPage extends LoggedInPage {
         boolean result = true;
         for (int i = 0; i < itemsArray.length(); i++) {
             JSONObject item = itemsArray.getJSONObject(i);
-            if (fillingForm(item) < 1) result = false;
+            if (submittingForm(item) < 1) result = false;
         }
         return result;
     }
-    public Integer fillingForm(JSONObject data) {
+    public Integer submittingForm(JSONObject data) {
         String uri = data.getString("url");
         String price = String.valueOf(data.getInt("price"));
         String price_value = data.getString("price_type");
@@ -67,7 +67,6 @@ public class AddAdPage extends LoggedInPage {
         driver.findElement(desc_id).sendKeys(desc);
         driver.findElement(price_id).sendKeys(price);
         selectDropdown(driver.findElement(price_type), price_value);
-        System.out.println("Filling in the controls");
 
         if (controls != null) {
             for (String key : controls.keySet()) {
@@ -108,25 +107,21 @@ public class AddAdPage extends LoggedInPage {
         }
 
         agreeCheckbox.click();
-        System.out.println("Agree");
         WebElement buttonSubmit = driver.findElement(submit);
         wait.until(d -> buttonSubmit.getAttribute("disabled") == null);
         buttonSubmit.click();
-        System.out.println("Submit");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(add_ad));
-        boolean success = isElementPresent(success_h);
-        if (success) {
-            System.out.println("Success");
-            return Integer.parseInt(driver.findElement(success_id)
-                    .getAttribute("href")
-                    .replaceAll("^.*?md.*?(\\d+).*$", "$1"));
+        System.out.println("Submitted");
+        wait.until(ExpectedConditions.stalenessOf(buttonSubmit));
+        Integer id = null;
+        if (isElementPresent(success_h)) {
+            id = getItemIdBy(success_id);
+            System.out.println(id + " Success");
+            return id;
         }
-        boolean payment = isElementPresent(payment_h);
-        if (payment) {
-            System.out.println("Item is placed but not active. It is need payment.");
-            return Integer.parseInt(driver.findElement(payment_id)
-                    .getAttribute("href")
-                    .replaceAll("^.*?md.*?(\\d+).*$", "$1"));
+        if (isElementPresent(payment_h)) {
+            id = getItemIdBy(payment_id);
+            System.out.println(id + " not active. Payment required.");
+            return id;
         }
         List<WebElement> errorElements = driver.findElements(error_hint_h);
         if (!errorElements.isEmpty()) {
@@ -135,7 +130,6 @@ public class AddAdPage extends LoggedInPage {
                 if (!elementText.trim().isEmpty()) {
                     System.out.println("Warning content: " + elementText);
                 }
-
                 List<WebElement> childElements = errorElement.findElements(By.xpath(".//*"));
                 for (WebElement childElement : childElements) {
                     String childText = childElement.getText();
@@ -144,9 +138,8 @@ public class AddAdPage extends LoggedInPage {
                     }
                 }
             }
-            return -1;
+            return -1; //Error or Warning
         }
-
         return 1;
 //        try {
 //            Thread.sleep(30000);
@@ -157,22 +150,18 @@ public class AddAdPage extends LoggedInPage {
 //            throw new RuntimeException("Stopping execution");
 //        }
 
-//        try {
-//            wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("success-add__text")));
-//            System.out.println("Success");
-//        } catch (Exception e) {
-//            WebElement errorSection = driver.findElement(By.className("board__content__errors grid_18"));
-//            WebElement payInfo = driver.findElement(By.className("product-payment__info__value"));
-//            if (payInfo.isDisplayed()) {
-//                System.out.println("Limit is reached");
-//            } else if (errorSection.isDisplayed()) {
+//            if (errorSection.isDisplayed()) {
 //                errorSection.findElements(By.tagName("li")).forEach(li -> System.out.println(li.getText()));
 //            } else {
 //                System.out.println("FALSE !!!");
 //            }
-//        }
     }
-    public void control(String id, String val) {
+    private Integer getItemIdBy(By element) {
+        return Integer.parseInt(driver.findElement(element)
+                .getAttribute("href")
+                .replaceAll("^.*?md.*?(\\d+).*$", "$1"));
+    }
+    private void control(String id, String val) {
         WebElement element = driver.findElement(By.id(id));
         if (element.getTagName().equals("select")) {
             selectDropdown(element, val);
