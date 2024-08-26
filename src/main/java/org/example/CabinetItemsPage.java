@@ -15,7 +15,6 @@ public class CabinetItemsPage extends LoggedInPage {
     By agree = By.xpath("//button[contains(@data-form-action, 'multiple_remove')]");
     By anchor = By.xpath("//form/table/tbody[@id='js-cabinet-items-list']");
     String uri = "https://999.md/cabinet/items";
-
     public CabinetItemsPage(WebDriver driver) {
         super(driver);  // Call MainPage constructor
         wait.until(ExpectedConditions.visibilityOfElementLocated(add_ad));
@@ -96,15 +95,15 @@ public class CabinetItemsPage extends LoggedInPage {
     private By getItem(String itemNumber) {
         return By.xpath(String.format(itemTemplate, itemNumber));
     }
-    public String getIdByTitle(String title) {
+    public Integer getIdByTitle(String title) {
         if (!driver.getCurrentUrl().contains("items")) driver.get(uri);
         List<WebElement> elements = driver.findElements(getSummary(title));
         if (elements.isEmpty()) return null;
         WebElement itemForSale = elements.get(0);
-        return itemForSale.getAttribute("href")
-                .replaceAll("^.*?md.*?(\\d+).*$", "$1"); //String OR Integer???
+        return Integer.parseInt(itemForSale.getAttribute("href")
+                .replaceAll("^.*?md.*?(\\d+).*$", "$1"));
     }
-    public Integer addDefaultAd() {
+    public AdItem addDefaultAd() {
         String json = "{\n" +
                 "  \"url\": \"https://999.md/add?category=construction-and-repair&subcategory=construction-and-repair/finishing-and-facing-materials\",\n" +
                 "  \"price\": 200,\n" +
@@ -121,7 +120,7 @@ public class CabinetItemsPage extends LoggedInPage {
         JSONObject jsonObject = new JSONObject(json);
         AddAdPage itempage = new AddAdPage(driver);
         int id = itempage.submittingForm(jsonObject);
-        return (id > 0) ? id : null;
+        return (id > 0) ? new AdItem(id, jsonObject.getString("title")) : new AdItem(null, null);
     }
     public void selectDropdown(WebElement dropdown, String value) {
         initializeSelect(dropdown);

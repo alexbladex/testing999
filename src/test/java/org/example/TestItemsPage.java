@@ -35,8 +35,17 @@ public class TestItemsPage {
         LoginPage loginpage = new LoginPage(driver);
         loginpage.performLogin(user,pswd);
         CabinetItemsPage itempage = new CabinetItemsPage(driver);
-        int adId = itempage.addDefaultAd();
-        //String adId = itempage.getIdByTitle(adTitle);
-        Assert.assertTrue(itempage.delLastItemById(adId), "Last Item was not deleted");
+        AdItem ad = itempage.addDefaultAd();
+        Assert.assertTrue(itempage.delLastItemById(ad.getId()), "Last Item was not deleted");
+    }
+    @Test
+    public void testGetIdByTitle() {
+        LoginPage loginpage = new LoginPage(driver);
+        loginpage.performLogin(user,pswd);
+        CabinetItemsPage itempage = new CabinetItemsPage(driver);
+        AdItem ad = itempage.addDefaultAd();
+        System.out.println(ad);
+        Integer id = itempage.getIdByTitle(ad.getTitle());
+        Assert.assertEquals(id, ad.getId(), "Ad Id does not match");
     }
 }
