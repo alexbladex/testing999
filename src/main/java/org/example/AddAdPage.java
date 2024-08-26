@@ -8,6 +8,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.io.File;
+import java.util.List;
 
 public class AddAdPage extends LoggedInPage {
     By items = By.xpath("//a[@href='/cabinet/items']");
@@ -22,24 +23,28 @@ public class AddAdPage extends LoggedInPage {
     By img_id = By.xpath("//section[@id='filupload-media-container']/figure/a/img");
     By agree = By.xpath("//input[@id='agree']");
     By submit = By.xpath("//div[@class='grid_11']/button[@type='submit']");
+    By error_hint_h = By.xpath("//*[contains(@id, 'error') or contains(@class, 'error')]");
     By payment_h = By.xpath("//form[@id='js-product-payment']/h1");
-    By success_h = By.xpath("//a[contains(@href, 'success') and normalize-space()='Пропустить']");
-    //переделать чтоб небыло русского или румынского текста
+    By payment_id = By.xpath("//link[@rel='alternate']"); ////meta[@property='og:url']
+    By success_h = By.xpath("//h2/*[contains(@class, 'success')]");
+    By success_id = By.xpath("//p/a[contains(@href, 'success')]");
 
     public AddAdPage(WebDriver driver) {
         super(driver);  // Call MainPage constructor
         wait.until(ExpectedConditions.visibilityOfElementLocated(add_ad));
     }
-    public void addItems(JSONArray itemsArray){
-        if (itemsArray == null) return;
+    public boolean addItems(JSONArray itemsArray){
+        if (itemsArray == null) return true;
         wait.until(ExpectedConditions.visibilityOfElementLocated(cabinet));
-        System.out.println("Submitting items");
+        System.out.print("Submitting items ");
+        boolean result = true;
         for (int i = 0; i < itemsArray.length(); i++) {
             JSONObject item = itemsArray.getJSONObject(i);
-            fillingForm(item);
+            if (fillingForm(item) < 1) result = false;
         }
+        return result;
     }
-    private void fillingForm(JSONObject data) {
+    public Integer fillingForm(JSONObject data) {
         String uri = data.getString("url");
         String price = String.valueOf(data.getInt("price"));
         String price_value = data.getString("price_type");
@@ -51,11 +56,12 @@ public class AddAdPage extends LoggedInPage {
         JSONArray imgArray = data.optJSONArray("img");
         JSONObject controls = data.optJSONObject("c");
 
-        if (skip_item) return;
+        if (skip_item) return 1;
         driver.get(uri);
         wait.until(ExpectedConditions.visibilityOfElementLocated(agree));
-        if (offer.equals("sell")) {driver.findElement(offer_sell).click();}
-        else {driver.findElement(offer_buy).click();}
+        System.out.println(title);
+        if (offer.equals("sell")) { driver.findElement(offer_sell).click(); }
+        else { driver.findElement(offer_buy).click(); }
         WebElement agreeCheckbox = wait.until(ExpectedConditions.visibilityOfElementLocated(agree));
         driver.findElement(title_id).sendKeys(title);
         driver.findElement(desc_id).sendKeys(desc);
@@ -94,9 +100,11 @@ public class AddAdPage extends LoggedInPage {
         }
 
         if (myads) {
-            driver.findElement(other_phone).click();
+            WebElement other = driver.findElement(other_phone);
+            if (other.isSelected()) other.click();
         } else {
-            driver.findElement(my_phone).click();
+            WebElement my = driver.findElement(my_phone);
+            if (my.isSelected()) my.click();
         }
 
         agreeCheckbox.click();
@@ -109,37 +117,60 @@ public class AddAdPage extends LoggedInPage {
         boolean success = isElementPresent(success_h);
         if (success) {
             System.out.println("Success");
-            return;
+            return Integer.parseInt(driver.findElement(success_id)
+                    .getAttribute("href")
+                    .replaceAll("^.*?md.*?(\\d+).*$", "$1"));
         }
         boolean payment = isElementPresent(payment_h);
         if (payment) {
-            System.out.println("Item is not placed. Payment canceled");
-            driver.findElement(payment_h).click();
-            return;
+            System.out.println("Item is placed but not active. It is need payment.");
+            return Integer.parseInt(driver.findElement(payment_id)
+                    .getAttribute("href")
+                    .replaceAll("^.*?md.*?(\\d+).*$", "$1"));
         }
+        List<WebElement> errorElements = driver.findElements(error_hint_h);
+        if (!errorElements.isEmpty()) {
+            for (WebElement errorElement : errorElements) {
+                String elementText = errorElement.getText();
+                if (!elementText.trim().isEmpty()) {
+                    System.out.println("Warning content: " + elementText);
+                }
+
+                List<WebElement> childElements = errorElement.findElements(By.xpath(".//*"));
+                for (WebElement childElement : childElements) {
+                    String childText = childElement.getText();
+                    if (!childText.trim().isEmpty()) {
+                        System.out.println("Warning content: " + childText);
+                    }
+                }
+            }
+            return -1;
+        }
+
+        return 1;
 //        try {
 //            Thread.sleep(30000);
 //        } catch (InterruptedException e) {
 //            e.printStackTrace();
 //        }
-        if (true) {
-            throw new RuntimeException("Stopping execution");
-        }
+//        if (true) {
+//            throw new RuntimeException("Stopping execution");
+//        }
 
-        try {
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("success-add__text")));
-            System.out.println("Success");
-        } catch (Exception e) {
-            WebElement errorSection = driver.findElement(By.className("board__content__errors grid_18"));
-            WebElement payInfo = driver.findElement(By.className("product-payment__info__value"));
-            if (payInfo.isDisplayed()) {
-                System.out.println("Limit is reached");
-            } else if (errorSection.isDisplayed()) {
-                errorSection.findElements(By.tagName("li")).forEach(li -> System.out.println(li.getText()));
-            } else {
-                System.out.println("FALSE !!!");
-            }
-        }
+//        try {
+//            wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("success-add__text")));
+//            System.out.println("Success");
+//        } catch (Exception e) {
+//            WebElement errorSection = driver.findElement(By.className("board__content__errors grid_18"));
+//            WebElement payInfo = driver.findElement(By.className("product-payment__info__value"));
+//            if (payInfo.isDisplayed()) {
+//                System.out.println("Limit is reached");
+//            } else if (errorSection.isDisplayed()) {
+//                errorSection.findElements(By.tagName("li")).forEach(li -> System.out.println(li.getText()));
+//            } else {
+//                System.out.println("FALSE !!!");
+//            }
+//        }
     }
     public void control(String id, String val) {
         WebElement element = driver.findElement(By.id(id));

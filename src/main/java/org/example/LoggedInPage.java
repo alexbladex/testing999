@@ -11,7 +11,7 @@ public class LoggedInPage extends MainPage {
     By logoutWin = By.xpath("//a[@class='login__user__buttons__logout']");
     public LoggedInPage(WebDriver driver) {
         super(driver);  // Call MainPage constructor
-        if (Config.debug) System.out.println(driver.getCurrentUrl() + " is opened");
+        if (this.getClass() == LoggedInPage.class) { if (Config.debug) System.out.println(driver.getCurrentUrl() + " is opened"); }
     }
     public void openItems(){
         mouseOver(cabinet);

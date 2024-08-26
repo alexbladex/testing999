@@ -1,5 +1,7 @@
 package org.example;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.openqa.selenium.*;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -43,19 +45,14 @@ public class UserItemsPage extends LoggedInPage {
                     List<WebElement> itemsForSale = driver.findElements(getSummary(itemSummary));
                     for (WebElement itemForSale : itemsForSale) {
                         if (item_qty == 0) break;
-                        String itemNumber = itemForSale.getAttribute("href").replaceAll("^.*?/ru/", "").replaceAll("\\D+", ""); // https://999.md/ru/87800316
+                        System.out.println(itemForSale.getAttribute("href"));
+                        //String itemNumber = itemForSale.getAttribute("href").replaceAll("^.*?/ru/", "").replaceAll("\\D+", ""); // https://999.md/ru/87800316
+                        String itemNumber = itemForSale.getAttribute("href").replaceAll("^.*?md.*?(\\d+).*$", "$1"); // https://999.md/ru/87800316
                         System.out.println(itemNumber);
                         new WebDriverWait(driver, Duration.ofSeconds(2)).until(ExpectedConditions.visibilityOfElementLocated(getItem(itemNumber))).click();
                         item_qty--;
                     }
-                    WebElement buttonDelete = driver.findElement(delete);
-                    if (buttonDelete.isDisplayed()) {
-                        buttonDelete.click();
-                        WebElement agreeDelete = driver.findElement(agree);
-                        agreeDelete.click();
-                        new WebDriverWait(driver, Duration.ofSeconds(2)).until(ExpectedConditions.invisibilityOf(buttonDelete));
-                        System.out.println("items deleted");
-                    }
+                    performDelete();
                 } while (!driver.findElements(getSummary(itemSummary)).isEmpty());
 
                 currentPage++;
@@ -64,17 +61,70 @@ public class UserItemsPage extends LoggedInPage {
         }
         System.out.println("Completed");
     }
-    public void delAllItems(String[] itemsArray){
-        delSelectedItems(itemsArray, -1); // -1: all
+    private boolean performDelete() {
+        List<WebElement> elements = driver.findElements(delete);
+        if (elements.isEmpty()) return false;
+        WebElement buttonDelete = elements.get(0);
+        if (buttonDelete.isDisplayed()) {
+            buttonDelete.click();
+            WebElement agreeDelete = driver.findElement(agree);
+            agreeDelete.click();
+            new WebDriverWait(driver, Duration.ofSeconds(2)).until(ExpectedConditions.invisibilityOf(buttonDelete));
+            System.out.println("items deleted");
+            return true;
+        }
+        System.out.println("items are not deleted");
+        return false;
     }
-    public void delLastItem(String[] itemsArray){
-        delSelectedItems(itemsArray, 1);
+    public void delAllItems(String[] titleArray){
+        delSelectedItems(titleArray, -1); // -1: all
+    }
+    public void delLastItem(String[] title){
+        delSelectedItems(title, 1); // last
+    }
+    public void delAllItems(String title){
+        delSelectedItems(new String[]{title}, -1); // -1: all
+    }
+    public void delLastItemByTitle(String title){
+        delSelectedItems(new String[]{title}, 1); // last
+    }
+    public boolean delLastItemById(Integer id){
+        driver.get(uri);
+        new WebDriverWait(driver, Duration.ofSeconds(2)).until(ExpectedConditions.visibilityOfElementLocated(getItem(id.toString()))).click();
+        return performDelete();
     }
     private By getSummary(String itemSummary) {
         return By.xpath(String.format(summaryTemplate, itemSummary));
     }
     private By getItem(String itemNumber) {
         return By.xpath(String.format(itemTemplate, itemNumber));
+    }
+    public Integer addDefaultAd() {
+        String json = "{\n" +
+                "  \"url\": \"https://999.md/add?category=construction-and-repair&subcategory=construction-and-repair/finishing-and-facing-materials\",\n" +
+                "  \"price\": 200,\n" +
+                "  \"price_type\": \"mdl\",\n" +
+                "  \"title\": \"плитка кафель 15*15 белая turkey\",\n" +
+                "  \"desc\": \"Настенная плитка кафель 15*15 цвет белая турция. 200 л/м2. Минимальный заказ 2 метра\",\n" +
+                "  \"img\": [\n" +
+                "    \"defaultAd/plitka1515.png\"\n" +
+                "  ],\n" +
+                "  \"c\": {\n" +
+                "    \"control_686\": 21099\n" +
+                "  }\n" +
+                "}";
+        JSONObject jsonObject = new JSONObject(json);
+        AddAdPage itempage = new AddAdPage(driver);
+        int id = itempage.fillingForm(jsonObject);
+        return (id > 0) ? id : null;
+    }
+    public String getIdByTitle(String title) {
+        driver.get(uri);
+        List<WebElement> elements = driver.findElements(getSummary(title));
+        if (elements.isEmpty()) return null;
+        WebElement itemForSale = elements.get(0);
+        return itemForSale.getAttribute("href")
+                .replaceAll("^.*?md.*?(\\d+).*$", "$1");
     }
     public void selectDropdown(WebElement dropdown, String value) {
         initializeSelect(dropdown);

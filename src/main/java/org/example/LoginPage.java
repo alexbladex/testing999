@@ -17,13 +17,19 @@ public class LoginPage extends BasePage {
         wait.until(ExpectedConditions.visibilityOfElementLocated(add_ad));
         if (Config.debug) System.out.println("Prepare to login.");
     }
-    public void performLogin(String user, String pswd) {
-        if (isElementPresent(cabinet)) {if (Config.debug) System.out.println("Already logged in"); return;}
+    public boolean isUserLoggedIn(){
+        boolean b = isElementPresent(cabinet);
+        if (Config.debug) System.out.println("User logged in: " + b);
+        return b;
+    }
+    public boolean performLogin(String user, String pswd) {
+        if (isElementPresent(cabinet)) {if (Config.debug) System.out.println("Already logged in"); return true;}
         do {
             if (!isElementPresent(loginLogo)) openLoginPage();
             wait.until(ExpectedConditions.visibilityOfElementLocated(loginLogo));
         } while (!loginWin(user, pswd));
-        if (Config.debug) System.out.println("Credential is entered");
+        if (Config.debug) System.out.println("Login completed");
+        return true;
     }
     public boolean loginWin(String username, String password) {
         boolean continueLogin = isElementPresent(logContinue);
@@ -36,6 +42,7 @@ public class LoginPage extends BasePage {
         driver.findElement(user).sendKeys(username);
         driver.findElement(pswd).sendKeys(password);
         driver.findElement(loginWin).click();
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(loginWin));
         return true;
     }
 }

@@ -17,13 +17,13 @@ public class MainPage extends BasePage{
         super(driver);  // Call MainPage constructor
         driver.get(url);
         waitDomainMatch(driver, url); //wait.until(ExpectedConditions.urlToBe(url));
-        if (Config.debug) System.out.println(driver.getCurrentUrl() + " is opened");
+        if (this.getClass() == MainPage.class) { if (Config.debug) System.out.println(driver.getCurrentUrl() + " is opened"); }
     }
     public MainPage(WebDriver driver, String url, By locator) {
         super(driver);  // Call MainPage constructor
         driver.get(url);
         wait.until(ExpectedConditions.visibilityOfElementLocated(locator)); // The locators are resolved only for those elements that have loaded at the moment the class is initialized
-        if (Config.debug) System.out.println(driver.getCurrentUrl() + " is opened");
+        if (this.getClass() == MainPage.class) { if (Config.debug) System.out.println(driver.getCurrentUrl() + " is opened"); }
     }
     private void waitDomainMatch(WebDriver driver, final String expectedUrl) {
         wait.until((ExpectedCondition<Boolean>) d -> {
