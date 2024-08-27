@@ -1,4 +1,4 @@
-package org.example;
+package ByGuiInteraction;
 
 public class Config {
     public static boolean debug, rmCookies;

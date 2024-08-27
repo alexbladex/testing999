@@ -1,10 +1,10 @@
-package org.example;
+package ByGuiInteraction;
 
 import org.openqa.selenium.WebDriver;
 import org.testng.Assert;
 import org.testng.annotations.*;
 
-public class TestItemsPage {
+public class TestLoginPage {
     private WebDriver driver;
     private MainPage mainpage;
     String uri, user, pswd;
@@ -30,22 +30,19 @@ public class TestItemsPage {
     public void clearCookies(){
         driver.manage().deleteAllCookies();
     }
-    @Test
-    public void testDelLastItem() {
-        LoginPage loginpage = new LoginPage(driver);
-        loginpage.performLogin(user,pswd);
-        CabinetItemsPage itempage = new CabinetItemsPage(driver);
-        AdItem ad = itempage.addDefaultAd();
-        Assert.assertTrue(itempage.delLastItemById(ad.getId()), "Last Item was not deleted");
+    @Test(enabled=true)
+    public void testLoginButton() {
+        Assert.assertTrue(mainpage.isLoginDisplayed(), "Login button is not visible");
     }
     @Test
-    public void testGetIdByTitle() {
+    public void testPerformLogin() {
+        LoginPage loginpage = new LoginPage(driver);
+        Assert.assertTrue(loginpage.performLogin(user,pswd), "Login is not completed");
+    }
+    @Test
+    public void testIsUserIn() {
         LoginPage loginpage = new LoginPage(driver);
         loginpage.performLogin(user,pswd);
-        CabinetItemsPage itempage = new CabinetItemsPage(driver);
-        AdItem ad = itempage.addDefaultAd();
-        System.out.println(ad);
-        Integer id = itempage.getIdByTitle(ad.getTitle());
-        Assert.assertEquals(id, ad.getId(), "Ad Id does not match");
+        Assert.assertTrue(loginpage.isUserLoggedIn(), "User is not logged in");
     }
 }

@@ -1,4 +1,4 @@
-package org.example;
+package ByGuiInteraction;
 
 import org.json.JSONObject;
 import org.openqa.selenium.*;

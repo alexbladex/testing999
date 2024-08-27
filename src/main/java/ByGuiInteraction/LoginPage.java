@@ -1,4 +1,4 @@
-package org.example;
+package ByGuiInteraction;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;

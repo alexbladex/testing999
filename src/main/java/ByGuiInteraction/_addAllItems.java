@@ -1,4 +1,4 @@
-package org.example;
+package ByGuiInteraction;
 
 import org.json.JSONArray;
 import org.openqa.selenium.WebDriver;

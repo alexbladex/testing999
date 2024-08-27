@@ -1,18 +1,19 @@
-package org.example;
-import java.io.FileInputStream;
+package ByGuiInteraction;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Properties;
-public class PropertyReader {
+
+public class PropertyReaderClassLoader {
     private static Properties properties = new Properties();
 
     static {
-        try (InputStream inputStream = new FileInputStream("config.properties");
-             InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
-            properties.load(reader); // try-with-resources
+        try (InputStream input = PropertyReader.class.getClassLoader().getResourceAsStream("config.properties")) {
+            if (input != null) {
+                properties.load(input);
+            } else {
+                throw new RuntimeException("Property file not found.");
+            }
         } catch (Exception e) {
-            e.printStackTrace(); // В продакшн доработать исключение
+            e.printStackTrace();
         }
     }
 
@@ -26,11 +27,14 @@ public class PropertyReader {
 
     public static String[] getPropertyArray(String key) {
         String property = getProperty(key);
-        return property != null ? property.split(",") : new String[0];
+        if (property != null) {
+            return property.split(",");
+        }
+        return new String[0];
     }
 
     public static void main(String[] args) {
-        String[] envUrls = PropertyReader.getPropertyArray("envUrls");
+        String[] envUrls = PropertyReaderClassLoader.getPropertyArray("envUrls");
         for (String url : envUrls) {
             System.out.println(url);
         }

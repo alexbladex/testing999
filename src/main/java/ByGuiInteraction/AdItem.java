@@ -1,4 +1,4 @@
-package org.example;
+package ByGuiInteraction;
 
 public class AdItem {
     private Integer id;
