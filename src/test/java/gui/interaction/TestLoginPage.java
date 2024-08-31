@@ -1,4 +1,4 @@
-package ByGuiInteraction;
+package gui.interaction;
 
 import org.openqa.selenium.WebDriver;
 import org.testng.Assert;

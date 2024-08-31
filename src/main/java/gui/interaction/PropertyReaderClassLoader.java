@@ -1,4 +1,4 @@
-package ByGuiInteraction;
+package gui.interaction;
 import java.io.InputStream;
 import java.util.Properties;
 
