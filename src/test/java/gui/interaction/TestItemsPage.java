@@ -16,7 +16,7 @@ public class TestItemsPage {
         pswd = PropertyReader.getProperty("pswd");
         System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
         driver = DriverFactory.init();
-        mainpage = new MainPage(driver, uri);
+        //mainpage = new MainPage(driver, uri);
     }
     @AfterClass
     public void closeTest(){
@@ -30,7 +30,7 @@ public class TestItemsPage {
     public void clearCookies(){
         driver.manage().deleteAllCookies();
     }
-    @Test
+    @Test(retryAnalyzer = RetryAnalyzer.class)
     public void testDelLastItem() {
         LoginPage loginpage = new LoginPage(driver);
         loginpage.performLogin(user,pswd);
@@ -38,13 +38,12 @@ public class TestItemsPage {
         AdItem ad = itempage.addDefaultAd();
         Assert.assertTrue(itempage.delLastItemById(ad.getId()), "Last Item was not deleted");
     }
-    @Test
+    @Test(retryAnalyzer = RetryAnalyzer.class)
     public void testGetIdByTitle() {
         LoginPage loginpage = new LoginPage(driver);
         loginpage.performLogin(user,pswd);
         CabinetItemsPage itempage = new CabinetItemsPage(driver);
         AdItem ad = itempage.addDefaultAd();
-        System.out.println(ad);
         Integer id = itempage.getIdByTitle(ad.getTitle());
         Assert.assertEquals(id, ad.getId(), "Ad Id does not match");
     }

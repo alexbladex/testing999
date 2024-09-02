@@ -85,7 +85,7 @@ public class CabinetItemsPage extends LoggedInPage {
     }
     public boolean delLastItemById(Integer id){
         if (!driver.getCurrentUrl().contains("items")) driver.get(uri);
-        System.out.println(id);
+        System.out.print(id + " ");
         wait.until(ExpectedConditions.visibilityOfElementLocated(getItem(id.toString()))).click();
         return performDelete();
     }
@@ -100,8 +100,10 @@ public class CabinetItemsPage extends LoggedInPage {
         List<WebElement> elements = driver.findElements(getSummary(title));
         if (elements.isEmpty()) return null;
         WebElement itemForSale = elements.get(0);
-        return Integer.parseInt(itemForSale.getAttribute("href")
+        int i = Integer.parseInt(itemForSale.getAttribute("href")
                 .replaceAll("^.*?md.*?(\\d+).*$", "$1"));
+        System.out.println("getIdByTitle return: " + i);
+        return i;
     }
     public AdItem addDefaultAd() {
         String json = "{\n" +

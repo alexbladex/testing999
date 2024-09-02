@@ -93,7 +93,8 @@ public class AddAdPage extends LoggedInPage {
                     wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
                     System.out.println("Image " + (i + 1) + " loaded");
                 } catch (Exception e) {
-                    System.out.println("Image not loaded");
+                    System.out.println("Error: Image not loaded");
+                    return -1; //Error or Warning
                 }
             }
         }
