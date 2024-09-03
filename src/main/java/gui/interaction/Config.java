@@ -5,6 +5,6 @@ public class Config {
 
     static {
         debug = PropertyReader.getPropertyBoolean("printLog");
-        rmCookies = PropertyReader.getPropertyBoolean("deleteSession");
+        rmCookies = PropertyReader.getPropertyBoolean("deletePrevSession");
     }
 }

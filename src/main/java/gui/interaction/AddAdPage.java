@@ -8,7 +8,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.io.File;
-import java.util.List;
+import java.util.*;
 
 public class AddAdPage extends LoggedInPage {
     By items = By.xpath("//a[@href='/cabinet/items']");
@@ -34,15 +34,53 @@ public class AddAdPage extends LoggedInPage {
         wait.until(ExpectedConditions.visibilityOfElementLocated(add_ad));
     }
     public boolean addItems(JSONArray itemsArray){
+        Integer[] userAdsList = null; // null = to use all ads from json
+        return addItems(itemsArray, userAdsList);
+    }
+    public boolean addUserItems(JSONArray itemsArray){
+        Integer[] userAdsList = getAdsList(PropertyReader.getProperty("userAdsList"));
+        return addItems(itemsArray, userAdsList);
+    }
+    public boolean addItems(JSONArray itemsArray, Integer[] userList){
         if (itemsArray == null) return true;
         wait.until(ExpectedConditions.visibilityOfElementLocated(cabinet));
         System.out.print("Submitting items ");
         boolean result = true;
-        for (int i = 0; i < itemsArray.length(); i++) {
-            JSONObject item = itemsArray.getJSONObject(i);
-            if (submittingForm(item) < 1) result = false;
+        if (userList == null) {
+            for (int i = 0; i < itemsArray.length(); i++) {
+                JSONObject item = itemsArray.getJSONObject(i);
+                if (submittingForm(item) < 1) result = false;
+            }
+        } else {
+            Set<Integer> userSet = new HashSet<>(Arrays.asList(userList));
+            for (int i = 0; i < itemsArray.length(); i++) {
+                if (userSet.contains(i)) {
+                    JSONObject item = itemsArray.getJSONObject(i);
+                    if (submittingForm(item) < 1) result = false;
+                }
+            }
         }
         return result;
+    }
+    public Integer[] getAdsList(String userAdsList) {
+        if (userAdsList == null) return null;
+        Set<Integer> resultSet = new TreeSet<>(); //автоматически удаляет дубликаты, сохраняет элементы в отсортированном порядке
+        String[] parts = userAdsList.split(",");
+
+        for (String part : parts) {
+            // Если часть содержит диапазон (например, "3-6")
+            if (part.contains("-")) {
+                String[] range = part.split("-");
+                int start = Integer.parseInt(range[0]);
+                int end = Integer.parseInt(range[1]);
+                for (int i = start; i <= end; i++) resultSet.add(i);
+            } else {
+                resultSet.add(Integer.parseInt(part));
+            }
+        }
+        //int[] resultArray = resultSet.stream().mapToInt(Integer::intValue).toArray();
+        Integer[] resultArray = resultSet.stream().toArray(Integer[]::new);
+        return resultArray;
     }
     public Integer submittingForm(JSONObject data) {
         String uri = data.getString("url");
