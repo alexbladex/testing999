@@ -1,5 +1,6 @@
 package http.requests;
 
+import gui.interaction.PropertyReader;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -13,10 +14,14 @@ import java.util.Arrays;
 
 public class ApacheRequest {
     public static void main(String[] args) throws Exception {
+        String uri, user, pswd;
+        uri = PropertyReader.getProperty("simpalsUriLogin");
+        user = PropertyReader.getProperty("user");
+        pswd = PropertyReader.getProperty("pswd");
         CloseableHttpClient client = HttpClients.createDefault();
 
         // Первый GET запрос
-        HttpGet getRequest = new HttpGet(new URI("https://simpalsid.com/user/login"));
+        HttpGet getRequest = new HttpGet(new URI(uri));
         getRequest.setHeader("authority", "simpalsid.com");
         getRequest.setHeader("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
         getRequest.setHeader("accept-language", "en-US,en;q=0.9");
@@ -59,7 +64,7 @@ public class ApacheRequest {
         }
 
         // Второй POST запрос
-        String postData = String.format("_xsrf=%s&redirect_url=%s&login=68user&password=123456789", xsrf, redirectUrl);
+        String postData = String.format("_xsrf=%s&redirect_url=%s&login=%s&password=%s", xsrf, redirectUrl, user, pswd);
 
         HttpPost postRequest = new HttpPost(new URI("https://simpalsid.com/user/login"));
         postRequest.setHeader("authority", "simpalsid.com");

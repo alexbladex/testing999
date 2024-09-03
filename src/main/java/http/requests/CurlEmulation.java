@@ -1,5 +1,7 @@
 package http.requests;
 
+import gui.interaction.PropertyReader;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -9,11 +11,15 @@ import java.util.Map;
 
 public class CurlEmulation {
     public static void main(String[] args) throws Exception {
+        String uri, user, pswd;
+        uri = PropertyReader.getProperty("simpalsUriLogin");
+        user = PropertyReader.getProperty("user");
+        pswd = PropertyReader.getProperty("pswd");
         HttpClient client = HttpClient.newHttpClient();
 
         // Первый GET запрос
         HttpRequest getRequest = HttpRequest.newBuilder()
-                .uri(new URI("https://simpalsid.com/user/login"))
+                .uri(new URI(uri))
                 .header("authority", "simpalsid.com")
                 .header("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
                 .header("accept-language", "en-US,en;q=0.9")
@@ -55,7 +61,7 @@ public class CurlEmulation {
         }
 
         // Второй POST запрос
-        String postData = String.format("_xsrf=%s&redirect_url=%s&login=68user&password=123456789", xsrf, redirectUrl);
+        String postData = String.format("_xsrf=%s&redirect_url=%s&login=%s&password=%s", xsrf, redirectUrl, user, pswd);
 
         HttpRequest postRequest = HttpRequest.newBuilder()
                 .uri(new URI("https://simpalsid.com/user/login"))
