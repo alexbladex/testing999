@@ -23,28 +23,39 @@ public class TestItemsPage {
         driver.quit();
     }
     @BeforeMethod
-    public void initializePageObjects() {
+    public void initiMainPage() {
         driver.get(uri);
+    }
+    @BeforeMethod(onlyForGroups = "requiresLogin", dependsOnMethods = "initiMainPage")
+    //Methods with the same annotation, for ex. @BeforeMethod, are executed in the alphabetical order.
+    //But attribute dependsOnMethods or Priority can change order
+    public void performLoginGroup() {
+        performLogin();
+    }
+    public void performLogin() {
+        LoginPage loginpage = new LoginPage(driver);
+        Assert.assertTrue(loginpage.performLogin(user,pswd), "Login is not completed");
     }
     @AfterMethod
     public void clearCookies(){
         driver.manage().deleteAllCookies();
     }
-    @Test(retryAnalyzer = RetryAnalyzer.class)
+    @Test(groups = "requiresLogin", retryAnalyzer = RetryAnalyzer.class)
     public void testDelLastItem() {
-        LoginPage loginpage = new LoginPage(driver);
-        loginpage.performLogin(user,pswd);
         CabinetItemsPage itempage = new CabinetItemsPage(driver);
         AdItem ad = itempage.addDefaultAd();
         Assert.assertTrue(itempage.delLastItemById(ad.getId()), "Last Item was not deleted");
     }
-    @Test(retryAnalyzer = RetryAnalyzer.class)
+    @Test(groups = "requiresLogin", retryAnalyzer = RetryAnalyzer.class)
     public void testGetIdByTitle() {
-        LoginPage loginpage = new LoginPage(driver);
-        loginpage.performLogin(user,pswd);
         CabinetItemsPage itempage = new CabinetItemsPage(driver);
         AdItem ad = itempage.addDefaultAd();
         Integer id = itempage.getIdByTitle(ad.getTitle());
         Assert.assertEquals(id, ad.getId(), "Ad Id does not match");
+    }
+    @Test
+    public void testLogin() {
+        LoginPage loginpage = new LoginPage(driver);
+        Assert.assertTrue(loginpage.performLogin(user,pswd), "Login is not completed");
     }
 }

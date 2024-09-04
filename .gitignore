@@ -2,6 +2,7 @@ drivers/
 images/
 screenshot/
 target/
+test-output/
 !**/src/main/**/target/
 !**/src/test/**/target/
 .mvn/

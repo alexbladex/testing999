@@ -35,7 +35,7 @@ public class TestBasePage {
         logger.info("Driver closed");
     }
     @BeforeMethod
-    public void initializePageObjects() {
+    public void initiMainPage() {
         driver.get(uri);
         logger.info("Navigated to URL: {}", uri);
     }
