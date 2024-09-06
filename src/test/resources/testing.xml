@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="GUI Interaction Suite" parallel="classes" thread-count="4">
+<!--    parallel="classes" for <class>, parallel="tests" for <test>-->
+    <parameter name="baseURL" value="https://999.md"/>
+    <test name="Test2Page">
+        <classes>
+            <class name="gui.interaction.TestBasePage"/>
+            <class name="gui.interaction.TestItemsPage"/>
+        </classes>
+    </test>
+    <listeners>
+        <listener class-name="gui.interaction.TestListener"/>
+    </listeners>
+</suite>

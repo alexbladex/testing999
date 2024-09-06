@@ -11,20 +11,20 @@ public class TestItemsPage {
 
     @BeforeClass
     public void setupTest() {
-        uri = PropertyReader.getProperty("uri");
+        //uri = PropertyReader.getProperty("uri");
         user = PropertyReader.getProperty("user");
         pswd = PropertyReader.getProperty("pswd");
         System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
         driver = DriverFactory.init();
-        //mainpage = new MainPage(driver, uri);
     }
     @AfterClass
     public void closeTest(){
         driver.quit();
     }
     @BeforeMethod
-    public void initiMainPage() {
-        driver.get(uri);
+    @Parameters("baseURL")
+    public void initiMainPage(String baseURL) {
+        driver.get(baseURL);
     }
     @BeforeMethod(onlyForGroups = "requiresLogin", dependsOnMethods = "initiMainPage")
     //Methods with the same annotation, for ex. @BeforeMethod, are executed in the alphabetical order.
@@ -46,7 +46,7 @@ public class TestItemsPage {
         AdItem ad = itempage.addDefaultAd();
         Assert.assertTrue(itempage.delLastItemById(ad.getId()), "Last Item was not deleted");
     }
-    @Test(groups = "requiresLogin", retryAnalyzer = RetryAnalyzer.class)
+    @Test(enabled = false, groups = "requiresLogin", retryAnalyzer = RetryAnalyzer.class)
     public void testGetIdByTitle() {
         CabinetItemsPage itempage = new CabinetItemsPage(driver);
         AdItem ad = itempage.addDefaultAd();

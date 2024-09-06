@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="SuiteName" parallel="methods" thread-count="5">
+    <!-- Optionally, you can include or exclude specific groups -->
+    <groups>
+        <run>
+            <include name="smoke"/>
+            <exclude name="regression"/>
+        </run>
+    </groups>
+
+    <!-- Suite-level parameters -->
+    <parameter name="baseURL" value="http://example.com"/>
+
+    <!-- Test Case 1 -->
+    <test name="Test1">
+        <classes>
+            <class name="com.example.tests.TestClass1"/>
+        </classes>
+    </test>
+
+    <!-- Test Case 2 with multiple classes -->
+    <test name="Test2">
+        <classes>
+            <class name="com.example.tests.TestClass2"/>
+            <class name="com.example.tests.TestClass3"/>
+        </classes>
+    </test>
+
+    <!-- Test Case 3 with parameterization -->
+    <test name="ParameterizedTest">
+        <classes>
+            <parameter name="browser" value="chrome"/>
+            <parameter name="version" value="91.0"/>
+            <class name="com.example.tests.ParameterizedTestClass">
+            </class>
+        </classes>
+    </test>
+    <!-- Optionally, you can include or exclude specific methods -->
+    <test name="TestName">
+        <classes>
+            <class name="com.example.YourTestClass">
+                <methods>
+                    <include name="yourTestMethod"/>
+                    <exclude name="anotherTestMethod"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <!-- Configurations -->
+    <listeners>
+        <listener class-name="com.example.listeners.CustomTestListener"/>
+    </listeners>
+
+</suite>

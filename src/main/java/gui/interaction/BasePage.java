@@ -139,16 +139,29 @@ public class BasePage {
     }
     public void takeScreenshot() {
         // Get the calling class and method name
-        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        String callingClass = stackTrace[2].getClassName();
-        String callingMethod = stackTrace[2].getMethodName();
-        callingClass = callingClass.substring(callingClass.lastIndexOf('.') + 1);
+        //StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE).getCallerClass().getName();
+        StackTraceElement stackTrace = Thread.currentThread().getStackTrace()[2];
+        String callerClass = stackTrace.getClassName();
+        String callerMethod = stackTrace.getMethodName();
+        callerClass = callerClass.substring(callerClass.lastIndexOf('.') + 1);
+        /*
+        final String[] callerInfo = new String[2];
+        StackWalker.getInstance().walk(frames -> {
+                    frames.skip(1)
+                            .findFirst()
+                            .ifPresent(frame -> {
+                                callerInfo[0] = frame.getClassName();
+                                callerInfo[1] = frame.getMethodName();
+                            });
+                    return null;
+                });
+         */
 
         // Generate timestamp
         String timestamp = new SimpleDateFormat("_yyyyMMdd_HHmmss").format(new Date());
 
         // Set the file path and name using the class, method, and timestamp
-        String filePath = "screenshot/" + callingClass + "_" + callingMethod + timestamp + ".png";
+        String filePath = "screenshot/" + callerClass + "_" + callerMethod + timestamp + ".png";
 
         ((TakesScreenshot) driver)
                 .getScreenshotAs(OutputType.FILE)

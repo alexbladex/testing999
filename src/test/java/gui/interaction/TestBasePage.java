@@ -2,17 +2,14 @@ package gui.interaction;
 
 import org.openqa.selenium.*;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Listeners(gui.interaction.TestListener.class)
 public class TestBasePage {
     private static final Logger logger = LoggerFactory.getLogger(TestBasePage.class);
     private WebDriver driver;
@@ -35,9 +32,10 @@ public class TestBasePage {
         logger.info("Driver closed");
     }
     @BeforeMethod
-    public void initiMainPage() {
-        driver.get(uri);
-        logger.info("Navigated to URL: {}", uri);
+    @Parameters("baseURL")
+    public void initiMainPage(String baseURL) {
+        driver.get(baseURL);
+        logger.info("Navigated to URL: {}", baseURL);
     }
     @AfterMethod
     public void clearCookies(){
