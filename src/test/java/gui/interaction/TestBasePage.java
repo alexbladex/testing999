@@ -33,7 +33,7 @@ public class TestBasePage {
     }
     @BeforeMethod
     @Parameters("baseURL")
-    public void initiMainPage(String baseURL) {
+    public void initMainPage(String baseURL) {
         driver.get(baseURL);
         logger.info("Navigated to URL: {}", baseURL);
     }

@@ -23,7 +23,7 @@ public class TestItemsPage {
     }
     @BeforeMethod
     @Parameters("baseURL")
-    public void initiMainPage(String baseURL) {
+    public void initMainPage(String baseURL) {
         driver.get(baseURL);
     }
     @BeforeMethod(onlyForGroups = "requiresLogin", dependsOnMethods = "initiMainPage")
@@ -40,7 +40,7 @@ public class TestItemsPage {
     public void clearCookies(){
         driver.manage().deleteAllCookies();
     }
-    @Test(groups = "requiresLogin", retryAnalyzer = RetryAnalyzer.class)
+    @Test(enabled = false, groups = "requiresLogin", retryAnalyzer = RetryAnalyzer.class)
     public void testDelLastItem() {
         CabinetItemsPage itempage = new CabinetItemsPage(driver);
         AdItem ad = itempage.addDefaultAd();

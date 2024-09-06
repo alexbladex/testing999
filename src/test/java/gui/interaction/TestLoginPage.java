@@ -23,7 +23,7 @@ public class TestLoginPage {
         driver.quit();
     }
     @BeforeMethod
-    public void initiMainPage() {
+    public void initMainPage() {
         driver.get(uri);
     }
     @AfterMethod

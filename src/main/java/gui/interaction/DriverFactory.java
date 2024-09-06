@@ -7,7 +7,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 public class DriverFactory {
     public static WebDriver init(String uri) {
         //multithreaded calling is available at class level. cos we are using getClassName()
-        String id = Thread.currentThread().getStackTrace()[2].getClassName() + System.currentTimeMillis();
+        String id = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE).getCallerClass().getName(); //+ System.currentTimeMillis();
         WebDriver driver = createDriver(id);
         //driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         //driver.manage().deleteAllCookies();
@@ -17,13 +17,13 @@ public class DriverFactory {
     }
     public static WebDriver init() {
         //multithreaded calling is available at class level. cos we are using getClassName()
-        String id = Thread.currentThread().getStackTrace()[2].getClassName() + System.currentTimeMillis();
+        String id = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE).getCallerClass().getName(); //+ System.currentTimeMillis();
         return createDriver(id);
     }
     private static WebDriver createDriver(String id) {
         //portable chrome name should be chrome.exe otherwise is need setBinary
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--user-data-dir=d:/Program Files/ChromePortable/Data/profile_" + id);
+        options.addArguments("--user-data-dir=d:/Program Files/ChromePortable/Data/profile." + id);
         options.addArguments("--no-default-browser-check");
         options.addArguments("--no-first-run");
         options.addArguments("--disable-extensions");
