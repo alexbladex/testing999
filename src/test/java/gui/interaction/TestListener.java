@@ -16,19 +16,19 @@ public class TestListener implements ITestListener {
     @Override
     public void onTestStart(ITestResult result) {
         MDC.put("testName", result.getName());
-        logger.info("Test started: {} with parameters: {}", result.getName(), Arrays.toString(result.getParameters()));
+        logger.info("Test started with parameters: {}", Arrays.toString(result.getParameters()));
     }
 
     @Override
     public void onTestSuccess(ITestResult result) {
-        logger.info("Test passed: {}", result.getName());
+        logger.info("Test passed.");
         MDC.remove("testName");
     }
 
     @Override
     public void onTestFailure(ITestResult result) {
         Throwable exception = result.getThrowable();
-        logger.error("Test failed: {}", result.getName());
+        logger.error("Test failed.");
         if (exception != null) {
             logger.error("Error message: {}", exception.getMessage());
             logger.error("Stack trace: ", exception);
@@ -38,13 +38,13 @@ public class TestListener implements ITestListener {
 
     @Override
     public void onTestSkipped(ITestResult result) {
-        logger.warn("Test skipped: {}", result.getName());
+        logger.warn("Test skipped.");
         MDC.remove("testName");
     }
 
     @Override
     public void onTestFailedButWithinSuccessPercentage(ITestResult result) {
-        logger.warn("Test partially failed: {}", result.getName());
+        logger.warn("Test partially failed.");
         MDC.remove("testName");
     }
 
