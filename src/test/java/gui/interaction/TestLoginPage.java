@@ -14,13 +14,12 @@ public class TestLoginPage {
         uri = PropertyReader.getProperty("uri");
         user = PropertyReader.getProperty("user");
         pswd = PropertyReader.getProperty("pswd");
-        System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
         driver = DriverFactory.init();
         mainpage = new MainPage(driver, uri);
     }
     @AfterClass
     public void closeTest(){
-        driver.quit();
+        DriverFactory.close();
     }
     @BeforeMethod
     public void initMainPage() {

@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 public class TestListener implements ITestListener {
-    private static final Logger logger = LoggerFactory.getLogger(TestListener.class);
+    private final Logger logger = LoggerFactory.getLogger(TestListener.class);
 
     @Override
     public void onTestStart(ITestResult result) {
@@ -56,5 +56,6 @@ public class TestListener implements ITestListener {
     @Override
     public void onFinish(ITestContext context) {
         logger.info("Test suite finished: {}", context.getName());
+//        DriverFactory.close();
     }
 }

@@ -17,6 +17,6 @@ public class _addAllItems {
         loginpage.performLogin(user,pswd);
         AddAdPage itempage = new AddAdPage(driver);
         itempage.addItems(itemsArray);
-        driver.quit();
+        DriverFactory.close();
     }
 }

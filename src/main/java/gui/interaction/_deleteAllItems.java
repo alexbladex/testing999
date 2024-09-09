@@ -24,6 +24,6 @@ public class _deleteAllItems {
         loginpage.performLogin(user,pswd);
         CabinetItemsPage itempage = new CabinetItemsPage(driver);
         itempage.delAllItems(itemsSummary);
-        driver.quit();
+        DriverFactory.close();
     }
 }

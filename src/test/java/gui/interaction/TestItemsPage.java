@@ -11,22 +11,21 @@ public class TestItemsPage {
 
     @BeforeClass
     public void setupTest() {
-        //uri = PropertyReader.getProperty("uri");
+        uri = PropertyReader.getProperty("uri");
         user = PropertyReader.getProperty("user");
         pswd = PropertyReader.getProperty("pswd");
-        System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
         driver = DriverFactory.init();
     }
     @AfterClass
     public void closeTest(){
-        driver.quit();
+        DriverFactory.close();
     }
+    //@Parameters("baseURL")
     @BeforeMethod
-    @Parameters("baseURL")
-    public void initMainPage(String baseURL) {
-        driver.get(baseURL);
+    public void initMainPage() {
+        driver.get(uri);
     }
-    @BeforeMethod(onlyForGroups = "requiresLogin", dependsOnMethods = "initiMainPage")
+    @BeforeMethod(onlyForGroups = "requiresLogin", dependsOnMethods = "initMainPage")
     //Methods with the same annotation, for ex. @BeforeMethod, are executed in the alphabetical order.
     //But attribute dependsOnMethods or Priority can change order
     public void performLoginGroup() {

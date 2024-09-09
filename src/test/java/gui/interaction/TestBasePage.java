@@ -11,7 +11,7 @@ import java.util.List;
 
 @Listeners(gui.interaction.TestListener.class)
 public class TestBasePage {
-    private static final Logger logger = LoggerFactory.getLogger(TestBasePage.class);
+    private final Logger logger = LoggerFactory.getLogger(TestBasePage.class);
     private WebDriver driver;
     private MainPage mainpage;
     String uri, user, pswd;
@@ -21,21 +21,20 @@ public class TestBasePage {
         uri = PropertyReader.getProperty("uri");
         user = PropertyReader.getProperty("user");
         pswd = PropertyReader.getProperty("pswd");
-        System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
         driver = DriverFactory.init();
         mainpage = new MainPage(driver, uri);
         logger.info("Test setup complete");
     }
     @AfterClass
     public void closeTest(){
-        driver.quit();
-        logger.info("Driver closed");
+        DriverFactory.close();
+        logger.info("Test Class closed");
     }
+    //@Parameters("baseURL")
     @BeforeMethod
-    @Parameters("baseURL")
-    public void initMainPage(String baseURL) {
-        driver.get(baseURL);
-        logger.info("Navigated to URL: {}", baseURL);
+    public void initMainPage() {
+        driver.get(uri);
+        logger.info("Navigated to URL: {}", uri);
     }
     @AfterMethod
     public void clearCookies(){
