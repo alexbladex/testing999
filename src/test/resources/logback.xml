@@ -10,6 +10,7 @@
         </rollingPolicy>
         <encoder>
             <pattern>%d{HH:mm:ss} [%thread] %logger{0} %-5level %method - %msg%n</pattern>
+<!--            <layout class="gui.interaction.CustomPatternLayout" />-->
         </encoder>
     </appender>
 
