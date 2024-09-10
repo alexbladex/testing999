@@ -1,4 +1,6 @@
-package gui.interaction;
+package com.example;
+import gui.interaction.PropertyReader;
+
 import java.io.InputStream;
 import java.util.Properties;
 

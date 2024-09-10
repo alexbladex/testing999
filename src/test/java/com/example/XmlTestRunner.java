@@ -1,4 +1,4 @@
-package org.example;
+package com.example;
 import org.testng.TestNG;
 import org.testng.xml.XmlSuite;
 
