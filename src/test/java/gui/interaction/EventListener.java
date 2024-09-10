@@ -8,10 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.Date;
 
-public class TestListener implements ITestListener {
-    private final Logger logger = LoggerFactory.getLogger(TestListener.class);
+public class EventListener implements ITestListener {
+    private final Logger logger = LoggerFactory.getLogger(EventListener.class);
 
     @Override
     public void onTestStart(ITestResult result) {

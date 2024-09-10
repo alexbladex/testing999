@@ -9,7 +9,7 @@ public class MethodConverter extends ClassicConverter {
     @Override
     public String convert(ILoggingEvent event) {
         String methodName = event.getCallerData()[0].getMethodName();
-        if (methodName.startsWith("onTest")) return MDC.get("testName"); //MDC.put in the TestListener
+        if (methodName.startsWith("onTest")) return MDC.get("testName"); //MDC.put in the Listener
         return methodName;
     }
 }

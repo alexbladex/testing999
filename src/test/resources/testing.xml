@@ -11,6 +11,6 @@
         </classes>
     </test>
     <listeners>
-        <listener class-name="gui.interaction.TestListener"/>
+        <listener class-name="gui.interaction.EventListener"/>
     </listeners>
 </suite>

@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-@Listeners(gui.interaction.TestListener.class)
+//@Listeners(EventListener.class)
 public class TestBasePage {
     private final Logger logger = LoggerFactory.getLogger(TestBasePage.class);
     private WebDriver driver;
