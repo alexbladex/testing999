@@ -5,6 +5,7 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.MDC;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +20,7 @@ public class BasePage {
     protected WebDriverWait wait;
     protected Actions actions;
     protected Select select;
+    protected static BasePage currentPage;
     By anchor = By.xpath("//h1[@class='mainPage__withDeliveryBlock__title']");
     By frame = By.xpath("//iframe[@id='topbar-panel']");
     By script_topbar = By.xpath("//script [@id='topbar']");
@@ -34,6 +36,7 @@ public class BasePage {
         this.driver = driver;
         this.actions = new Actions(driver);
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+        currentPage = this;
     }
     public enum AddType {
         SELL, BUY
@@ -140,10 +143,6 @@ public class BasePage {
     public void takeScreenshot() {
         // Get the calling class and method name
         //StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE).getCallerClass().getName();
-        StackTraceElement stackTrace = Thread.currentThread().getStackTrace()[2];
-        String callerClass = stackTrace.getClassName();
-        String callerMethod = stackTrace.getMethodName();
-        callerClass = callerClass.substring(callerClass.lastIndexOf('.') + 1);
         /*
         final String[] callerInfo = new String[2];
         StackWalker.getInstance().walk(frames -> {
@@ -156,15 +155,23 @@ public class BasePage {
                     return null;
                 });
          */
-
+        StackTraceElement stackTrace = Thread.currentThread().getStackTrace()[2];
+        String callerClass = stackTrace.getClassName();
+        String callerMethod = stackTrace.getMethodName();
+        callerClass = callerClass.substring(callerClass.lastIndexOf('.') + 1);
+        takeScreenshot(callerClass, callerMethod);
+    }
+    public void takeScreenshot(String callerClass, String callerMethod) {
         // Generate timestamp
         String timestamp = new SimpleDateFormat("_yyyyMMdd_HHmmss").format(new Date());
-
         // Set the file path and name using the class, method, and timestamp
         String filePath = "screenshot/" + callerClass + "_" + callerMethod + timestamp + ".png";
-
+        // Take 'n' Save
         ((TakesScreenshot) driver)
                 .getScreenshotAs(OutputType.FILE)
                 .renameTo(new File(filePath));
+    }
+    public static BasePage getCurrentPage() {
+        return currentPage;
     }
 }

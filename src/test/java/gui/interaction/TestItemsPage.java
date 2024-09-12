@@ -57,4 +57,8 @@ public class TestItemsPage {
         LoginPage loginpage = new LoginPage(driver);
         Assert.assertTrue(loginpage.performLogin(user,pswd), "Login is not completed");
     }
+    @Test
+    public void testFailed() {
+        throw new RuntimeException("Тест не пройден!");
+    }
 }

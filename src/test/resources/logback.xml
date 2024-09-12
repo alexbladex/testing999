@@ -9,7 +9,7 @@
             <maxHistory>7</maxHistory>
         </rollingPolicy>
         <encoder>
-            <pattern>%d{HH:mm:ss} [%thread] %logger{0} %-5level %method - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss} [%thread] %-15logger{0} %-5level %method - %msg%n</pattern>
 <!--            <layout class="gui.interaction.CustomPatternLayout" />-->
         </encoder>
     </appender>

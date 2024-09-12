@@ -14,37 +14,38 @@ public class EventListener implements ITestListener {
 
     @Override
     public void onTestStart(ITestResult result) {
-        MDC.put("testName", result.getName());
+        MDC.put("testMethod", result.getName());
+        MDC.put("testClass", result.getTestClass().getRealClass().getSimpleName());
         logger.info("Test started with parameters: {}", Arrays.toString(result.getParameters()));
     }
 
     @Override
     public void onTestSuccess(ITestResult result) {
         logger.info("Test passed.");
-        MDC.remove("testName");
     }
 
     @Override
     public void onTestFailure(ITestResult result) {
+        BasePage currentPage = BasePage.getCurrentPage();
+        if (currentPage != null) {
+            logger.error("Test failed on page: {}", currentPage.getClass().getSimpleName());
+            currentPage.takeScreenshot(MDC.get("testClass"),MDC.get("testMethod"));
+        } else logger.error("Test failed.");
+
         Throwable exception = result.getThrowable();
-        logger.error("Test failed.");
         if (exception != null) {
             logger.error("Error message: {}", exception.getMessage());
-            logger.error("Stack trace: ", exception);
         }
-        MDC.remove("testName");
     }
 
     @Override
     public void onTestSkipped(ITestResult result) {
         logger.warn("Test skipped.");
-        MDC.remove("testName");
     }
 
     @Override
     public void onTestFailedButWithinSuccessPercentage(ITestResult result) {
         logger.warn("Test partially failed.");
-        MDC.remove("testName");
     }
 
     @Override
@@ -55,6 +56,8 @@ public class EventListener implements ITestListener {
     @Override
     public void onFinish(ITestContext context) {
         logger.info("Test suite finished: {}", context.getName());
+        MDC.remove("testClass");
+        MDC.remove("testMethod");
 //        DriverFactory.close();
     }
 }
