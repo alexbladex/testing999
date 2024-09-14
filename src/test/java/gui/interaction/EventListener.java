@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 
 public class EventListener implements ITestListener {
-    private final Logger logger = LoggerFactory.getLogger(EventListener.class);
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
     public void onTestStart(ITestResult result) {
@@ -28,8 +28,8 @@ public class EventListener implements ITestListener {
     public void onTestFailure(ITestResult result) {
         BasePage currentPage = BasePage.getCurrentPage();
         if (currentPage != null) {
-            logger.error("Test failed on page: {}", currentPage.getClass().getSimpleName());
-            currentPage.takeScreenshot(MDC.get("testClass"),MDC.get("testMethod"));
+            logger.error("Test failed on page: {} !!!", currentPage.getClass().getSimpleName());
+            currentPage.takeScreenshot(result.getTestClass().getRealClass().getSimpleName(),result.getName());
         } else logger.error("Test failed.");
 
         Throwable exception = result.getThrowable();
@@ -56,8 +56,8 @@ public class EventListener implements ITestListener {
     @Override
     public void onFinish(ITestContext context) {
         logger.info("Test suite finished: {}", context.getName());
-        MDC.remove("testClass");
         MDC.remove("testMethod");
+        MDC.remove("testClass");
 //        DriverFactory.close();
     }
 }

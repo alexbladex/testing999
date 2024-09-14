@@ -5,7 +5,6 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.slf4j.MDC;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +37,7 @@ public class BasePage {
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(15));
         currentPage = this;
     }
-    public enum AddType {
+    public enum AdType {
         SELL, BUY
     }
     public By getAnchor() { return anchor; }
@@ -50,6 +49,11 @@ public class BasePage {
     protected void scrollTo(By element) {
         wait.until(ExpectedConditions.visibilityOfElementLocated(element));
         ((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView(true);", driver.findElement(element));
+    }
+    public boolean isCabinetDisplayed(){
+        boolean b = isElementPresent(cabinet);
+        if (Config.debug) System.out.println("Personal Cabinet is visible: " + b);
+        return b;
     }
     public boolean isLoginDisplayed(){
         boolean b = isElementPresent(login);
@@ -143,8 +147,7 @@ public class BasePage {
     public void takeScreenshot() {
         // Get the calling class and method name
         //StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE).getCallerClass().getName();
-        /*
-        final String[] callerInfo = new String[2];
+        /* final String[] callerInfo = new String[2];
         StackWalker.getInstance().walk(frames -> {
                     frames.skip(1)
                             .findFirst()
@@ -153,15 +156,14 @@ public class BasePage {
                                 callerInfo[1] = frame.getMethodName();
                             });
                     return null;
-                });
-         */
+                }); */
         StackTraceElement stackTrace = Thread.currentThread().getStackTrace()[2];
         String callerClass = stackTrace.getClassName();
         String callerMethod = stackTrace.getMethodName();
         callerClass = callerClass.substring(callerClass.lastIndexOf('.') + 1);
         takeScreenshot(callerClass, callerMethod);
     }
-    public void takeScreenshot(String callerClass, String callerMethod) {
+    protected void takeScreenshot(String callerClass, String callerMethod) {
         // Generate timestamp
         String timestamp = new SimpleDateFormat("_yyyyMMdd_HHmmss").format(new Date());
         // Set the file path and name using the class, method, and timestamp

@@ -9,9 +9,9 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-//@Listeners(EventListener.class)
+//@Listeners(gui.interaction.EventListener.class)
 public class TestBasePage {
-    private final Logger logger = LoggerFactory.getLogger(TestBasePage.class);
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private WebDriver driver;
     private MainPage mainpage;
     String uri, user, pswd;
@@ -56,7 +56,7 @@ public class TestBasePage {
     @Test
     public void testChangeLang() {
         String activeLang = mainpage.currentLang();
-        mainpage.takeScreenshot();
+        //mainpage.takeScreenshot();
         logger.info("Current language: {}", activeLang);
 
         if (activeLang.equals("ro")) mainpage.changeLang("ru");

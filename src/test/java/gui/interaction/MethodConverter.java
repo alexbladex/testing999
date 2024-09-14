@@ -8,8 +8,9 @@ public class MethodConverter extends ClassicConverter {
     // Used for logback
     @Override
     public String convert(ILoggingEvent event) {
+        String className = event.getLoggerName();
         String methodName = event.getCallerData()[0].getMethodName();
-        if (methodName.startsWith("onTest")) return MDC.get("testMethod"); //MDC.put in the Listener
-        return methodName;
+        if (methodName.startsWith("onTest")) return String.format("%s.%s", MDC.get("testClass"), MDC.get("testMethod")); //MDC.put in the Listener
+        return String.format("%s.%s", className.substring(className.lastIndexOf(".") + 1), methodName);
     }
 }
