@@ -55,7 +55,7 @@ public class EventListener implements ITestListener {
 
     @Override
     public void onFinish(ITestContext context) {
-        logger.info("Test suite finished: {}", context.getName());
+        logger.info("Test suite finished: {}\n", context.getName());
         MDC.remove("testMethod");
         MDC.remove("testClass");
 //        DriverFactory.close();

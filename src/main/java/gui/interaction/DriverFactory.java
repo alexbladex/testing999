@@ -34,6 +34,7 @@ public class DriverFactory {
     }
     private static WebDriver createDriver(String id) {
         //portable chrome name should be chrome.exe otherwise is need setBinary
+        //https://support.google.com/chrome/answer/114662
         createProfileDir();
         String profilePath = tempDir + File.separator + id;
         System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
@@ -41,10 +42,14 @@ public class DriverFactory {
         options.addArguments("--user-data-dir=" + profilePath);
         options.addArguments("--no-default-browser-check");
         options.addArguments("--no-first-run");
+//        options.addArguments("--enable-precise-memory-info");
         options.addArguments("--disable-extensions");
         options.addArguments("--disable-default-apps");
         options.addArguments("--disable-popup-blocking");
         options.addArguments("--disable-features=WebBluetooth");
+        options.addArguments("--disable-features=ThirdPartyCookies");
+        options.addArguments("--disable-search-engine-choice-screen");
+        options.addArguments("--disable-features=OptimizationGuideModelDownloading,OptimizationHintsFetching,OptimizationTargetPrediction,OptimizationHints");
         options.addArguments("--ignore-certificate-errors");
         options.addArguments("--headless");
         return new ChromeDriver(options);
