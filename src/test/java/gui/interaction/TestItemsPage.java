@@ -67,6 +67,6 @@ public class TestItemsPage {
     }
     @Test(enabled = true)
     public void testFailed() {
-        throw new RuntimeException("Тест не пройден!");
+        throw new RuntimeException("This is an uncaught exception!");
     }
 }
