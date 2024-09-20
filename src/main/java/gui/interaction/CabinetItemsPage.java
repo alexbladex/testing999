@@ -19,7 +19,7 @@ public class CabinetItemsPage extends LoggedInPage {
         super(driver);  // Call MainPage constructor
         wait.until(ExpectedConditions.visibilityOfElementLocated(add_ad));
     }
-    private void delSelectedItems(String[] itemsArray, int item_qty){
+    private void delSelectedItems(String[] itemsArray, int item_qty, DataAdItemState state){
         if (!driver.getCurrentUrl().contains("items")) driver.get(uri);
         wait.until(ExpectedConditions.visibilityOfElementLocated(anchor));
         for (String itemSummary : itemsArray) {
@@ -41,10 +41,27 @@ public class CabinetItemsPage extends LoggedInPage {
                     List<WebElement> itemsForSale = driver.findElements(getSummary(itemSummary));
                     for (WebElement itemForSale : itemsForSale) {
                         if (item_qty == 0) break;
-                        //String itemNumber = itemForSale.getAttribute("href").replaceAll("^.*?/ru/", "").replaceAll("\\D+", ""); // https://999.md/ru/87800316
-                        String itemNumber = itemForSale.getAttribute("href").replaceAll("^.*?md.*?(\\d+).*$", "$1");
+                        WebElement trElement = itemForSale.findElement(By.xpath("./ancestor::tr"));
+                        String itemState = trElement.getAttribute("data-test-item-state");
+                        System.out.println(itemState);
+                        String itemNumber = itemForSale.getAttribute("href").replaceAll("^.*?md.*?(\\d+).*$", "$1"); // https://999.md/ru/87800316
                         System.out.println(itemNumber);
-                        wait.until(ExpectedConditions.visibilityOfElementLocated(getItem(itemNumber))).click();
+                        WebElement inputElement = trElement.findElement(By.xpath(".//td//input"));
+
+                        boolean shouldClick = true;
+                        switch (state) {
+                            case DISABLED:
+                                if (itemState.equals("public")) {
+                                    shouldClick = false;
+                                }
+                                break;
+                            case ACTIVE:
+                                if (itemState.matches("need_pay|expired|blocked")) {
+                                    shouldClick = false;
+                                }
+                                break;
+                        }
+                        if (shouldClick) wait.until(ExpectedConditions.visibilityOf(inputElement)).click(); //visibilityOfElementLocated(getItem(itemNumber))
                         item_qty--;
                     }
                     performDelete();
@@ -57,31 +74,37 @@ public class CabinetItemsPage extends LoggedInPage {
         System.out.println("Completed");
     }
     private boolean performDelete() {
-        List<WebElement> elements = driver.findElements(delete);
-        if (elements.isEmpty()) return false;
-        WebElement buttonDelete = elements.get(0);
-        if (buttonDelete.isDisplayed()) {
-            buttonDelete.click();
-            WebElement agreeDelete = driver.findElement(agree);
-            agreeDelete.click();
-            wait.until(ExpectedConditions.invisibilityOf(buttonDelete));
+        System.out.println("trying delete");
+        try {
+            driver.findElement(delete).click();
+            Thread.sleep(100);
+            driver.findElement(agree).click();
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(delete));
+            driver.navigate().refresh();
             System.out.println("deleted.");
             return true;
+        } catch (Exception e) {
+            System.out.println("not deleted: " + e.getMessage());
+            return false;
         }
-        System.out.println("are not deleted.");
-        return false;
     }
     public void delAllItems(String[] titleArray){
-        delSelectedItems(titleArray, -1); // -1: all
+        delSelectedItems(titleArray, -1, DataAdItemState.ALL); // -1: all
+    }
+    public void delAllInactiveItems(String[] titleArray){
+        delSelectedItems(titleArray, -1, DataAdItemState.DISABLED); // -1: all
+    }
+    public void delAllActiveItems(String[] titleArray){
+        delSelectedItems(titleArray, -1, DataAdItemState.ACTIVE); // -1: all
     }
     public void delLastItems(String[] titles){
-        delSelectedItems(titles, 1); // last of each
+        delSelectedItems(titles, 1, DataAdItemState.ALL); // last(newest) of each titles
     }
     public void delAllItems(String title){
-        delSelectedItems(new String[]{title}, -1); // -1: all
+        delSelectedItems(new String[]{title}, -1, DataAdItemState.ALL); // -1: all
     }
     public void delLastItemByTitle(String title){
-        delSelectedItems(new String[]{title}, 1); // last
+        delSelectedItems(new String[]{title}, 1, DataAdItemState.ALL); // last(newest)
     }
     public boolean delLastItemById(Integer id){
         if (!driver.getCurrentUrl().contains("items")) driver.get(uri);

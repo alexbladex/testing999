@@ -5,10 +5,11 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 public class PropertyReader {
+    private static final String FILE_PATH = "config.properties";
     private static Properties properties = new Properties();
 
     static {
-        try (InputStream inputStream = new FileInputStream("config.properties");
+        try (InputStream inputStream = new FileInputStream(FILE_PATH);
              InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
             properties.load(reader); // try-with-resources
         } catch (Exception e) {

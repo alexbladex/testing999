@@ -20,7 +20,7 @@ public class BasePage {
     protected Actions actions;
     protected Select select;
     protected static BasePage currentPage;
-    By anchor = By.xpath("//h1[@class='mainPage__withDeliveryBlock__title']");
+    By anchor = By.xpath("//aside//img");
     By frame = By.xpath("//iframe[@id='topbar-panel']");
     By script_topbar = By.xpath("//script [@id='topbar']");
     By buttonLang = By.xpath("//li[@id='user-language']/button[@class='user-item-btn']");
@@ -99,9 +99,10 @@ public class BasePage {
     }
     protected boolean isElementPresent(By element) {
         try {
-            driver.findElement(element);
-            return true;
-        } catch (NoSuchElementException | StaleElementReferenceException e) {
+            Thread.sleep(100);
+            if (driver.findElement(element).isDisplayed()) return true;
+            return false;
+        } catch (NoSuchElementException | StaleElementReferenceException | InterruptedException e) {
             return false;
         }
     }

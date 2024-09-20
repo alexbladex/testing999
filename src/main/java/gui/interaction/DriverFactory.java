@@ -21,6 +21,7 @@ public class DriverFactory {
                 .walk(frames -> frames
                         .map(StackWalker.StackFrame::getClassName)
                         .filter(className -> !className.equals(DriverFactory.class.getName())) // Finding the external caller Class
+                        .map(className -> className.substring(className.lastIndexOf('.') + 1)) // Extracting the class name
                         .findFirst()
                         .orElse("UnknownCaller"));
         WebDriver driver = createDriver(id);
@@ -35,8 +36,9 @@ public class DriverFactory {
     private static WebDriver createDriver(String id) {
         //portable chrome name should be chrome.exe otherwise is need setBinary
         //https://support.google.com/chrome/answer/114662
-        createProfileDir();
-        String profilePath = tempDir + File.separator + id;
+        boolean isHeadless = false;
+
+        String profilePath = createProfileDir(tempDir + File.separator + id);
         System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--user-data-dir=" + profilePath);
@@ -46,26 +48,35 @@ public class DriverFactory {
         options.addArguments("--disable-extensions");
         options.addArguments("--disable-default-apps");
         options.addArguments("--disable-popup-blocking");
-        options.addArguments("--disable-features=WebBluetooth");
-        options.addArguments("--disable-features=ThirdPartyCookies");
         options.addArguments("--disable-search-engine-choice-screen");
-        options.addArguments("--disable-features=OptimizationGuideModelDownloading,OptimizationHintsFetching,OptimizationTargetPrediction,OptimizationHints");
+        options.addArguments("--disable-features=WebBluetooth,ThirdPartyCookies");
+//        options.addArguments("--disable-features=OptimizationGuideModelDownloading,OptimizationHintsFetching,OptimizationTargetPrediction,OptimizationHints");
+//        options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--ignore-certificate-errors");
-        options.addArguments("--headless");
+        options.addArguments("--log-level=DEBUG");
+        options.addArguments("--verbose");
+        if (isHeadless) options.addArguments("--headless");
+        else options.addArguments("--remote-debugging-port=9222"); //если в user-data-dir использовать родную папку профиля а не временную то non-headless режим будет работать и без debugging-port
+
         return new ChromeDriver(options);
     }
-    private static void createProfileDir() {
-        synchronized (tempDir) {
-            if (!tempDir.exists()) {
-                if (!tempDir.mkdirs()) throw new RuntimeException("Failed to create profile folder: " + tempDir);
-                try {
-                    Runtime.getRuntime().exec("icacls \"" + tempDir.getAbsolutePath() + "\" /grant Everyone:(OI)(CI)F");
-                    logger.info("Granted full permissions to: {}", tempDir);
-                } catch (IOException e) {
-                    logger.warn("Failed to grant full permissions to: {}", tempDir, e);
-                }
+    private static String createProfileDir(String path) {
+        File profileDir = new File(path);
+
+        if (!profileDir.getParentFile().exists()) {
+            if (!profileDir.getParentFile().mkdirs()) throw new RuntimeException("Failed to create parent folder: " + profileDir.getParentFile());
+        }
+
+        if (!profileDir.exists()) {
+            if (!profileDir.mkdirs()) throw new RuntimeException("Failed to create profile folder: " + profileDir);
+            try {
+                Runtime.getRuntime().exec("icacls \"" + profileDir.getAbsolutePath() + "\" /grant Everyone:(OI)(CI)F");
+                logger.info("Granted full permissions to: {}", profileDir);
+            } catch (IOException e) {
+                logger.warn("Failed to grant full permissions to: {}", profileDir, e);
             }
         }
+        return profileDir.getAbsolutePath();
     }
     public static synchronized void close(){
         WebDriver driver = drivers.remove(Thread.currentThread());

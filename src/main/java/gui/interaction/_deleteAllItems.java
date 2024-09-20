@@ -23,7 +23,7 @@ public class _deleteAllItems {
         LoginPage loginpage = new LoginPage(driver);
         loginpage.performLogin(user,pswd);
         CabinetItemsPage itempage = new CabinetItemsPage(driver);
-        itempage.delAllItems(itemsSummary);
+        itempage.delAllInactiveItems(itemsSummary);
         DriverFactory.close();
     }
 }

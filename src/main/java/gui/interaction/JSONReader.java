@@ -5,11 +5,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class JSONReader {
+    private static final String JSON_FILE_PATH = "config.json";
     private static JSONObject jsonObject;
 
     static {
         try {
-            String jsonContent = new String(Files.readAllBytes(Paths.get("config.json")), "UTF-8");
+            String jsonContent = new String(Files.readAllBytes(Paths.get(JSON_FILE_PATH)), "UTF-8");
             jsonObject = new JSONObject(jsonContent);
         } catch (Exception e) {
             e.printStackTrace(); // В продакшн доработать исключение

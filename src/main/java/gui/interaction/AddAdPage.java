@@ -41,7 +41,7 @@ public class AddAdPage extends LoggedInPage {
         Integer[] userAdsList = getAdsList(PropertyReader.getProperty("userAdsList"));
         return addItems(itemsArray, userAdsList);
     }
-    public boolean addItems(JSONArray itemsArray, Integer[] userList){
+    private boolean addItems(JSONArray itemsArray, Integer[] userList){
         if (itemsArray == null) return true;
         wait.until(ExpectedConditions.visibilityOfElementLocated(cabinet));
         System.out.print("Submitting items ");
@@ -62,7 +62,7 @@ public class AddAdPage extends LoggedInPage {
         }
         return result;
     }
-    public Integer[] getAdsList(String userAdsList) {
+    private Integer[] getAdsList(String userAdsList) {
         if (userAdsList == null) return null;
         Set<Integer> resultSet = new TreeSet<>(); //автоматически удаляет дубликаты, сохраняет элементы в отсортированном порядке
         String[] parts = userAdsList.split(",");
@@ -82,7 +82,7 @@ public class AddAdPage extends LoggedInPage {
         Integer[] resultArray = resultSet.stream().toArray(Integer[]::new);
         return resultArray;
     }
-    public Integer submittingForm(JSONObject data) {
+    protected Integer submittingForm(JSONObject data) {
         String uri = data.getString("url");
         String price = String.valueOf(data.getInt("price"));
         String price_value = data.getString("price_type");
@@ -125,9 +125,9 @@ public class AddAdPage extends LoggedInPage {
                 String relativePath = "images/" + imgArray.getString(i);
                 String absolutePath = new File(relativePath).getAbsolutePath();
                 fileUpload.sendKeys(absolutePath);
+                String imgXpath = img_id.toString().replace("By.xpath: ", "");
+                String xpath = String.format("(%s)[%d]", imgXpath, i + 1);
                 try {
-                    String imgXpath = img_id.toString().replace("By.xpath: ", "");
-                    String xpath = String.format("(%s)[%d]", imgXpath, i + 1);
                     wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
                     System.out.println("Image " + (i + 1) + " loaded");
                 } catch (Exception e) {
