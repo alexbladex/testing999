@@ -32,8 +32,7 @@ public class LoginPage extends BasePage {
         return true;
     }
     public boolean loginWin(String username, String password) {
-        boolean continueLogin = isElementPresent(logContinue);
-        if (continueLogin) {
+        if (isElementPresent(logContinue)) {
             driver.findElement(logoutWin).click();
             wait.until(ExpectedConditions.invisibilityOfElementLocated(logoutWin));
             if (Config.debug) System.out.println("Old session");

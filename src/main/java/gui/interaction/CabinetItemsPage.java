@@ -83,7 +83,6 @@ public class CabinetItemsPage extends LoggedInPage {
         for (WebElement itemForSale : itemsForSale) {
             WebElement trElement = itemForSale.findElement(By.xpath("./ancestor::tr"));
             String itemState = trElement.getAttribute("data-test-item-state");
-
             switch (state) {
                 case DISABLED:
                     if (itemState.matches("need_pay|expired|blocked")) return true;

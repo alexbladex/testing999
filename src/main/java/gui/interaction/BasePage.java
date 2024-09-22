@@ -103,7 +103,6 @@ public class BasePage {
             if (driver.findElement(element).isDisplayed()) return true;
             return false;
         } catch (NoSuchElementException | StaleElementReferenceException | InterruptedException e) {
-            System.out.println("isElementPresent exception!");
             return false;
         }
     }
