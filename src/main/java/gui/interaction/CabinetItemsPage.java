@@ -19,7 +19,7 @@ public class CabinetItemsPage extends LoggedInPage {
         super(driver);  // Call MainPage constructor
         wait.until(ExpectedConditions.visibilityOfElementLocated(add_ad));
     }
-    private void delSelectedItems(String[] itemsArray, int item_qty, DataAdItemState state){
+    private void delSelectedItems(String[] itemsArray, int item_qty, final DataAdItemState state){
         if (!driver.getCurrentUrl().contains("items")) driver.get(uri);
         wait.until(ExpectedConditions.visibilityOfElementLocated(anchor));
         for (String itemSummary : itemsArray) {
@@ -28,9 +28,11 @@ public class CabinetItemsPage extends LoggedInPage {
             List<WebElement> paginators = driver.findElements(page_qty);
             do {
                 if (item_qty == 0) break;
-                paginators.get(currentPage).click();
-                wait.until(ExpectedConditions.stalenessOf(paginators.get(currentPage)));
-                System.out.println("Opening next page");
+                if (paginators.size() > 0) {
+                    paginators.get(currentPage).click();
+                    wait.until(ExpectedConditions.stalenessOf(paginators.get(currentPage)));
+                    System.out.println("Opening next page");
+                }
                 WebElement frameElement = driver.findElement(frame);
                 ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('style', 'display:none');", frameElement);
                 frameElement = driver.findElement(script_topbar);
@@ -65,7 +67,7 @@ public class CabinetItemsPage extends LoggedInPage {
                         item_qty--;
                     }
                     performDelete();
-                } while (!driver.findElements(getSummary(itemSummary)).isEmpty());
+                } while (isFoundDesired(itemSummary, state));
 
                 currentPage++;
                 paginators = driver.findElements(page_qty);
@@ -73,14 +75,39 @@ public class CabinetItemsPage extends LoggedInPage {
         }
         System.out.println("Completed");
     }
+    private boolean isFoundDesired(String itemSummary, DataAdItemState state) {
+        List<WebElement> itemsForSale = driver.findElements(getSummary(itemSummary));
+        if (state.equals(DataAdItemState.ALL) && !itemsForSale.isEmpty()) {
+            return true;
+        }
+        for (WebElement itemForSale : itemsForSale) {
+            WebElement trElement = itemForSale.findElement(By.xpath("./ancestor::tr"));
+            String itemState = trElement.getAttribute("data-test-item-state");
+
+            switch (state) {
+                case DISABLED:
+                    if (itemState.matches("need_pay|expired|blocked")) return true;
+                    break;
+                case ACTIVE:
+                    if (itemState.equals("public")) return true;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unexpected state: " + state);
+            }
+        }
+        return false;
+    }
     private boolean performDelete() {
         System.out.println("trying delete");
+        WebElement delButton = driver.findElement(delete);
+        if (!delButton.isDisplayed()) return true;
         try {
-            driver.findElement(delete).click();
+            delButton.click();
             Thread.sleep(100);
             driver.findElement(agree).click();
-            wait.until(ExpectedConditions.invisibilityOfElementLocated(delete));
-            driver.navigate().refresh();
+            wait.until(ExpectedConditions.invisibilityOf(delButton));
+            Thread.sleep(1000);
+//            driver.navigate().refresh();
             System.out.println("deleted.");
             return true;
         } catch (Exception e) {

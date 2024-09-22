@@ -96,9 +96,10 @@ public class DriverFactory {
                 for (File file : allContents) {
                     if (file.isDirectory()) {
                         delProfile(file);
-                        if (!file.delete()) logger.warn("Failed to delete directory: {}", file.getAbsolutePath(), new Exception("Failed to delete directory"));
+                        if (!file.delete()) logger.warn("Failed to delete directory: {}", file.getAbsolutePath());
                     } else {
-                        if (!file.delete()) logger.warn("Failed to delete file: {}", file.getAbsolutePath(), new Exception("Failed to delete file"));
+                        //if (!file.delete()) logger.warn("Failed to delete file: {}", file.getAbsolutePath(), new Exception("Failed to delete file"));
+                        file.delete();
                     }
                 }
             }

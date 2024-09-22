@@ -10,8 +10,10 @@ public class MainPage extends BasePage{
 
     public MainPage(WebDriver driver) {
         super(driver);  // Call MainPage constructor
-        wait.until(ExpectedConditions.visibilityOfElementLocated(anchor)); // The locators are resolved only for those elements that have loaded at the moment the class is initialized
-        if (this.getClass() == MainPage.class) { if (Config.debug) System.out.println("Main page is opened"); }
+        if (this.getClass() == MainPage.class) {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(anchor));
+            if (Config.debug) System.out.println("Main page is opened");
+        }
     }
     public MainPage(WebDriver driver, String url) {
         super(driver);  // Call MainPage constructor
