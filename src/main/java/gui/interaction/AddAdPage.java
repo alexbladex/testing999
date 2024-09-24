@@ -46,18 +46,12 @@ public class AddAdPage extends LoggedInPage {
         wait.until(ExpectedConditions.visibilityOfElementLocated(cabinet));
         System.out.print("Submitting items ");
         boolean result = true;
-        if (userList == null) {
-            for (int i = 0; i < itemsArray.length(); i++) {
+        Set<Integer> userSet = (userList != null) ? new HashSet<>(Arrays.asList(userList)) : null;
+        for (int i = 0; i < itemsArray.length(); i++) {
+            if (userSet == null || userSet.contains(i)) {
                 JSONObject item = itemsArray.getJSONObject(i);
-                if (submittingForm(item) < 1) result = false;
-            }
-        } else {
-            Set<Integer> userSet = new HashSet<>(Arrays.asList(userList));
-            for (int i = 0; i < itemsArray.length(); i++) {
-                if (userSet.contains(i)) {
-                    JSONObject item = itemsArray.getJSONObject(i);
-                    if (submittingForm(item) < 1) result = false;
-                }
+                AdItem ad = submittingForm(item);
+                if (ad.getStatus().equals(null)) result = false;
             }
         }
         return result;
@@ -82,7 +76,7 @@ public class AddAdPage extends LoggedInPage {
         Integer[] resultArray = resultSet.stream().toArray(Integer[]::new);
         return resultArray;
     }
-    protected Integer submittingForm(JSONObject data) {
+    protected AdItem submittingForm(JSONObject data) {
         String uri = data.getString("url");
         String price = String.valueOf(data.getInt("price"));
         String price_value = data.getString("price_type");
@@ -94,7 +88,7 @@ public class AddAdPage extends LoggedInPage {
         JSONArray imgArray = data.optJSONArray("img");
         JSONObject controls = data.optJSONObject("c");
 
-        if (skip_item) return 1;
+        if (skip_item) return new AdItem(null, null, null, null);
         driver.get(uri);
         wait.until(ExpectedConditions.visibilityOfElementLocated(agree));
         System.out.println(title);
@@ -127,12 +121,19 @@ public class AddAdPage extends LoggedInPage {
                 fileUpload.sendKeys(absolutePath);
                 String imgXpath = img_id.toString().replace("By.xpath: ", "");
                 String xpath = String.format("(%s)[%d]", imgXpath, i + 1);
-                try {
-                    wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
-                    System.out.println("Image " + (i + 1) + " loaded");
-                } catch (Exception e) {
-                    System.out.println("Error: Image not loaded");
-                    return -1; //Error or Warning
+                boolean isImageLoaded = false;
+                for (int attempt = 0; attempt < 2; attempt++) {
+                    try {
+                        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
+                        System.out.println("Image " + (i + 1) + " loaded");
+                        isImageLoaded = true;
+                        break;
+                    } catch (Exception e) {
+                        System.out.println("Error: Image " + (i + 1) + " not loaded");
+                    }
+                }
+                if (!isImageLoaded) {
+                    return new AdItem(-1, title, null, "Image not loaded");
                 }
             }
         }
@@ -155,12 +156,12 @@ public class AddAdPage extends LoggedInPage {
         if (isElementPresent(success_h)) {
             id = getItemIdBy(success_id);
             System.out.println(id + " Success");
-            return id;
+            return new AdItem(id, title, "public", null);
         }
         if (isElementPresent(payment_h)) {
             id = getItemIdBy(payment_id);
             System.out.println(id + " not active. Payment required.");
-            return id;
+            return new AdItem(id, title, "need_pay", null);
         }
         List<WebElement> errorElements = driver.findElements(error_hint_h);
         if (!errorElements.isEmpty()) {
@@ -173,13 +174,13 @@ public class AddAdPage extends LoggedInPage {
                 for (WebElement childElement : childElements) {
                     String childText = childElement.getText();
                     if (!childText.trim().isEmpty()) {
-                        System.out.println("Warning content: " + childText);
+                        System.out.println("Warning child content: " + childText);
                     }
                 }
             }
-            return -1; //Error or Warning
+            return new AdItem(-1, title, null, "Warning content");
         }
-        return 1;
+        return new AdItem(null, null, null, null);
 //        try {
 //            Thread.sleep(30000);
 //        } catch (InterruptedException e) {

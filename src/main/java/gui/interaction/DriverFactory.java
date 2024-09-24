@@ -36,12 +36,12 @@ public class DriverFactory {
     private static WebDriver createDriver(String id) {
         //portable chrome name should be chrome.exe otherwise is need setBinary
         //https://support.google.com/chrome/answer/114662
-        boolean isHeadless = false;
 
         String profilePath = createProfileDir(tempDir + File.separator + id);
         System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--user-data-dir=" + profilePath);
+        options.addArguments("--ignore-certificate-errors");
         options.addArguments("--no-default-browser-check");
         options.addArguments("--no-first-run");
 //        options.addArguments("--enable-precise-memory-info");
@@ -52,10 +52,7 @@ public class DriverFactory {
         options.addArguments("--disable-features=WebBluetooth,ThirdPartyCookies");
 //        options.addArguments("--disable-features=OptimizationGuideModelDownloading,OptimizationHintsFetching,OptimizationTargetPrediction,OptimizationHints");
 //        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--ignore-certificate-errors");
-        options.addArguments("--log-level=DEBUG");
-        options.addArguments("--verbose");
-        if (isHeadless) options.addArguments("--headless");
+        if (false) options.addArguments("--headless");
         else options.addArguments("--remote-debugging-port=9222"); //если в user-data-dir использовать родную папку профиля а не временную то non-headless режим будет работать и без debugging-port
 
         return new ChromeDriver(options);

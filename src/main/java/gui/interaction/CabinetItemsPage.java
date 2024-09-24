@@ -170,8 +170,7 @@ public class CabinetItemsPage extends LoggedInPage {
                 "}";
         JSONObject jsonObject = new JSONObject(json);
         AddAdPage itempage = new AddAdPage(driver);
-        int id = itempage.submittingForm(jsonObject);
-        return (id > 0) ? new AdItem(id, jsonObject.getString("title")) : new AdItem(null, null);
+        return itempage.submittingForm(jsonObject);
     }
     public void selectDropdown(WebElement dropdown, String value) {
         initializeSelect(dropdown);
