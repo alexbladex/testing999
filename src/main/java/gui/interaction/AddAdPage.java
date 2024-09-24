@@ -51,7 +51,7 @@ public class AddAdPage extends LoggedInPage {
             if (userSet == null || userSet.contains(i)) {
                 JSONObject item = itemsArray.getJSONObject(i);
                 AdItem ad = submittingForm(item);
-                if (ad.getStatus().equals(null)) result = false;
+                if (ad.getId() < 0) result = false;
             }
         }
         return result;
