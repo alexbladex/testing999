@@ -22,7 +22,7 @@ public class _deleteAllItems {
         mainpage.changeLang("ru");
         LoginPage loginpage = new LoginPage(driver);
         loginpage.performLogin(user,pswd);
-        CabinetItemsPage itempage = new CabinetItemsPage(driver);
+        DelAdPage itempage = new DelAdPage(driver);
         itempage.delAllInactiveItems(itemsSummary);
         DriverFactory.close();
     }
