@@ -133,7 +133,7 @@ public class DelAdPage extends LoggedInPage {
         return delSelectedItems(new String[]{title}, -1, DataAdItemState.ALL); // -1: all
     }
     public int delInactiveItems(String title){
-        delSelectedItems(new String[]{title}, -1, DataAdItemState.DISABLED); // -1: all
+        return delSelectedItems(new String[]{title}, -1, DataAdItemState.DISABLED); // -1: all
     }
     public int delActiveItems(String title){
         return delSelectedItems(new String[]{title}, -1, DataAdItemState.ACTIVE); // -1: all
