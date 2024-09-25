@@ -34,7 +34,7 @@ public class EventListener implements ITestListener {
 
         Throwable exception = result.getThrowable();
         if (exception != null) {
-            logger.error("Error message: {}", exception.getMessage());
+            logger.error("{}: {}", exception.getClass().getSimpleName(), exception.getMessage());
         }
     }
 

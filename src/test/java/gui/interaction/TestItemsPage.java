@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.*;
 
+@Listeners(EventListener.class)
 public class TestItemsPage {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private WebDriver driver;
@@ -44,13 +45,13 @@ public class TestItemsPage {
     }
     @Test(enabled = false, groups = "requiresLogin", retryAnalyzer = RetryAnalyzer.class)
     public void testDelLastItem() {
-        CabinetItemsPage itempage = new CabinetItemsPage(driver);
+        DelAdPage itempage = new DelAdPage(driver);
         AdItem ad = itempage.addDefaultAd();
         Assert.assertTrue(itempage.delLastItemById(ad.getId()), "Last Item was not deleted");
     }
-    @Test(enabled = false, groups = "requiresLogin", retryAnalyzer = RetryAnalyzer.class)
+    @Test(enabled = true, groups = "requiresLogin")
     public void testGetIdByTitle() {
-        CabinetItemsPage itempage = new CabinetItemsPage(driver);
+        DelAdPage itempage = new DelAdPage(driver);
         AdItem ad = itempage.addDefaultAd();
         Integer id = itempage.getIdByTitle(ad.getTitle());
         Assert.assertEquals(id, ad.getId(), "Ad Id does not match");
@@ -65,7 +66,7 @@ public class TestItemsPage {
         MainPage mainpage = new MainPage(driver);
         Assert.assertFalse(mainpage.isCabinetDisplayed(), "Personal Cabinet is visible for not logged in user");
     }
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void testFailed() {
         throw new RuntimeException("This is an uncaught exception!");
     }
