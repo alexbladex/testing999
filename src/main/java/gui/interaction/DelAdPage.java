@@ -168,7 +168,7 @@ public class DelAdPage extends LoggedInPage {
     }
     public AdItem addDefaultAd() {
         AdTemplate temp = new AdTemplate();
-        JSONObject jsonObject = new JSONObject(temp.getAd());
+        JSONObject jsonObject = temp.getAd();
         AddAdPage itempage = new AddAdPage(driver);
         return itempage.submittingForm(jsonObject);
     }

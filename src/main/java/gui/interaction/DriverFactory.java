@@ -52,7 +52,7 @@ public class DriverFactory {
         options.addArguments("--disable-features=WebBluetooth,ThirdPartyCookies");
 //        options.addArguments("--disable-features=OptimizationGuideModelDownloading,OptimizationHintsFetching,OptimizationTargetPrediction,OptimizationHints");
 //        options.addArguments("--disable-dev-shm-usage");
-        if (false) options.addArguments("--headless");
+        if (true) options.addArguments("--headless");
         else options.addArguments("--remote-debugging-port=9222"); //если в user-data-dir использовать родную папку профиля а не временную то non-headless режим будет работать и без debugging-port
 
         return new ChromeDriver(options);
