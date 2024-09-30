@@ -97,14 +97,14 @@ public class CurlEmulation {
         if (matcher.find()) {
             token = matcher.group(1);
             token2 = matcher.group(2);
-            token = URLEncoder.encode(token, StandardCharsets.UTF_8);
-            token2 = URLEncoder.encode(token2, StandardCharsets.UTF_8);
         } else {
             System.out.println("Token not found");
         }
 
         location = String.format("https://999.md/external/auth/log_in?token=%s&token2=%s&redirect_url=%s",
-                token, token2, URLEncoder.encode(redirect_url, StandardCharsets.UTF_8));
+                URLEncoder.encode(token, StandardCharsets.UTF_8),
+                URLEncoder.encode(token2, StandardCharsets.UTF_8),
+                URLEncoder.encode(redirect_url, StandardCharsets.UTF_8));
 
         // Третий GET запрос
         HttpRequest tokenRequest = HttpRequest.newBuilder()
@@ -146,12 +146,16 @@ public class CurlEmulation {
 
         // Отправляем запрос и получаем ответ в виде массива байт
         HttpResponse<byte[]> siteResponse = client.send(siteRequest, HttpResponse.BodyHandlers.ofByteArray());
+        map = extractCookies(siteResponse);
+
+        String utid = map.get("utid");
 
         // Выводим в консоль весь заголовок ответа на четвертый запрос
         System.out.println("\nResponse Headers (GET):");
         siteResponse.headers().map().forEach((key, values) -> {
             System.out.println(key + ": " + String.join(", ", values));
         });
+        System.out.println(utid);
 
         // Проверяем, сжат ли ответ
         if (siteResponse.headers().firstValue("content-encoding").orElse("").contains("gzip")) {
@@ -173,9 +177,8 @@ public class CurlEmulation {
         }
 
     }
-    public static HashMap<String, String> extractCookies(HttpResponse<String> response) {
+    public static <T> HashMap<String, String> extractCookies(HttpResponse<T> response) {
         HashMap<String, String> cookiesMap = new HashMap<>();
-
         List<String> cookies = response.headers().allValues("Set-Cookie");
 
         for (String cookie : cookies) {
@@ -192,11 +195,9 @@ public class CurlEmulation {
                 //if (value.startsWith("\"") && value.endsWith("\"")) {
                 //    value = value.substring(1, value.length() - 1);
                 //}
-
                 cookiesMap.put(key, value);
             }
         }
-
         return cookiesMap;
     }
 }
