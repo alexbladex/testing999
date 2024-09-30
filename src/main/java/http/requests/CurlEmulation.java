@@ -57,10 +57,6 @@ public class CurlEmulation {
         System.out.println("Redirect URL: " + redirect_url);
 
         // Второй POST запрос
-//        String postData = "_xsrf=" + URLEncoder.encode(_xsrf, StandardCharsets.UTF_8)
-//                + "&redirect_url=" + URLEncoder.encode(redirect_url, StandardCharsets.UTF_8)
-//                + "&login=" + URLEncoder.encode(user, StandardCharsets.UTF_8)
-//                + "&password=" + URLEncoder.encode(pswd, StandardCharsets.UTF_8);
         String postData = String.format("_xsrf=%s&redirect_url=%s&login=%s&password=%s", _xsrf, redirect_url, user, pswd);
 
         HttpRequest postRequest = HttpRequest.newBuilder()
