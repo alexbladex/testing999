@@ -10,6 +10,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -22,6 +23,7 @@ public class CurlEmulation {
         uri = PropertyReader.getProperty("simpalsUriLogin");
         user = PropertyReader.getProperty("user68");
         pswd = PropertyReader.getProperty("pswd68");
+        HashMap<String, String> map = null;
 
         HttpClient client = HttpClient.newHttpClient();
 
@@ -32,36 +34,24 @@ public class CurlEmulation {
                 .header("accept-language", "en-US,en;q=0.9")
                 .header("accept-encoding", "gzip, deflate, br")
                 .header("cache-control", "max-age=0")
-                .header("dnt", "1")
-                .header("sec-fetch-dest", "document")
-                .header("sec-fetch-mode", "navigate")
-                .header("sec-fetch-site", "none")
-                .header("sec-fetch-user", "?1")
-                .header("upgrade-insecure-requests", "1")
                 .header("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36")
                 .build();
 
         HttpResponse<String> getResponse = client.send(getRequest, HttpResponse.BodyHandlers.ofString());
+        map = extractCookies(getResponse);
+        String _xsrf = map.get("_xsrf");
+        String redirect_url = map.get("redirect_url");
+
+//        map.forEach((k, v) -> System.out.println(k + ": " + v));
+//        for (Map.Entry<String, String> entry : map.entrySet()){
+//            System.out.println(entry.getKey() + "/" + entry.getValue());
+//        }
 
         // Выводим в консоль весь заголовок ответа на первый запрос
         System.out.println("Response Headers (GET):");
         getResponse.headers().map().forEach((key, values) -> {
             System.out.println(key + ": " + String.join(", ", values));
         });
-
-        // Извлекаем значения _xsrf и redirect_url из заголовков Set-Cookie
-        String _xsrf = null;
-        String redirect_url = null;
-        Map<String, List<String>> headers = getResponse.headers().map();
-        if (headers.containsKey("set-cookie")) {
-            for (String cookie : headers.get("set-cookie")) {
-                if (cookie.startsWith("_xsrf")) {
-                    _xsrf = cookie.split("=")[1].split(";")[0];
-                } else if (cookie.startsWith("redirect_url")) {
-                    redirect_url = cookie.split("=")[1].split(";")[0].replace("\"", "");
-                }
-            }
-        }
 
         System.out.println("XSRF Token: " + _xsrf);
         System.out.println("Redirect URL: " + redirect_url);
@@ -80,38 +70,23 @@ public class CurlEmulation {
                 .header("accept-encoding", "gzip, deflate, br")
                 .header("cache-control", "max-age=0")
                 .header("content-type", "application/x-www-form-urlencoded")
-                .header("cookie", String.format("_xsrf=%s; redirect_url=\"%s\"", _xsrf, redirect_url))
-                .header("dnt", "1")
-                .header("origin", "https://simpalsid.com")
+                .header("cookie", String.format("_xsrf=%s; redirect_url=%s", _xsrf, redirect_url))
                 .header("referer", "https://simpalsid.com/user/login")
-                .header("sec-fetch-dest", "document")
-                .header("sec-fetch-mode", "navigate")
-                .header("sec-fetch-site", "same-origin")
-                .header("sec-fetch-user", "?1")
-                .header("upgrade-insecure-requests", "1")
                 .header("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36")
                 .POST(HttpRequest.BodyPublishers.ofString(postData))
                 .build();
 
         HttpResponse<String> postResponse = client.send(postRequest, HttpResponse.BodyHandlers.ofString());
+        map = extractCookies(postResponse);
+
+        String auth = map.get("auth");
+        String location = postResponse.headers().firstValue("location").orElse(null);
 
         // Выводим в консоль весь заголовок ответа на второй запрос
         System.out.println("\nResponse Headers (POST):");
         postResponse.headers().map().forEach((key, values) -> {
             System.out.println(key + ": " + String.join(", ", values));
         });
-
-        // Извлекаем значения auth и location из заголовков Set-Cookie
-        String auth = null, simpalsid_auth = null;
-        String location = postResponse.headers().firstValue("location").orElse(null);
-        headers = postResponse.headers().map();
-        if (headers.containsKey("set-cookie")) {
-            for (String cookie : headers.get("set-cookie")) {
-                if (cookie.startsWith("auth")) {
-                    auth = cookie.split("=")[1].split(";")[0];
-                }
-            }
-        }
 
         System.out.println("AUTH Token: " + auth);
         System.out.println("Redirect URL: " + location);
@@ -138,37 +113,21 @@ public class CurlEmulation {
                 .header("accept-language", "en-US,en;q=0.9")
                 .header("accept-encoding", "gzip, deflate, br")
                 .header("cache-control", "max-age=0")
-                .header("dnt", "1")
                 .header("referer", "https://simpalsid.com/user/login")
-                .header("sec-fetch-dest", "document")
-                .header("sec-fetch-mode", "navigate")
-                .header("sec-fetch-site", "cross-site")
-                .header("sec-fetch-user", "?1")
-                .header("upgrade-insecure-requests", "1")
                 .header("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36")
                 .build();
 
         HttpResponse<String> tokenResponse = client.send(tokenRequest, HttpResponse.BodyHandlers.ofString());
+        map = extractCookies(tokenResponse);
+
+        String simpalsid_auth = map.get("simpalsid.auth");
+        location = tokenResponse.headers().firstValue("location").orElse(null);
 
         // Выводим в консоль весь заголовок ответа на третий запрос
         System.out.println("\nResponse Headers (GET):");
         tokenResponse.headers().map().forEach((key, values) -> {
             System.out.println(key + ": " + String.join(", ", values));
         });
-
-        // Извлекаем значения auth и simpalsid.auth из заголовков Set-Cookie
-        headers = tokenResponse.headers().map();
-        if (headers.containsKey("set-cookie")) {
-            for (String cookie : headers.get("set-cookie")) {
-                if (cookie.startsWith("simpalsid.auth")) {
-                    simpalsid_auth = cookie.split("=")[1].split(";")[0];
-                } else if (cookie.contains("auth")) {
-                    auth = cookie.split("=")[1].split(";")[0];
-                }
-            }
-        }
-
-        location = tokenResponse.headers().firstValue("location").orElse(null);
 
         System.out.println("AUTH Token: " + auth);
         System.out.println("SimpalsAuth Token: " + simpalsid_auth);
@@ -182,12 +141,6 @@ public class CurlEmulation {
                 .header("accept-encoding", "gzip, deflate, br")
                 .header("cache-control", "max-age=0")
                 .header("cookie", String.format("simpalsid.auth=%s; auth=%s", simpalsid_auth, auth))
-                .header("dnt", "1")
-                .header("sec-fetch-dest", "document")
-                .header("sec-fetch-mode", "navigate")
-                .header("sec-fetch-site", "cross-site")
-                .header("sec-fetch-user", "?1")
-                .header("upgrade-insecure-requests", "1")
                 .header("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36")
                 .build();
 
@@ -219,5 +172,31 @@ public class CurlEmulation {
             System.out.println(responseBody);
         }
 
+    }
+    public static HashMap<String, String> extractCookies(HttpResponse<String> response) {
+        HashMap<String, String> cookiesMap = new HashMap<>();
+
+        List<String> cookies = response.headers().allValues("Set-Cookie");
+
+        for (String cookie : cookies) {
+            // Разделяем на ключ и значение
+            String[] cookieParts = cookie.split(";", 2);
+            String[] keyValue = cookieParts[0].split("=", 2);
+
+            if (keyValue.length == 2) {
+                String key = keyValue[0].trim();
+                String value = keyValue[1].trim();
+
+                // Удаляем кавычки, если они есть
+                value = value.replace("\"", "");
+                //if (value.startsWith("\"") && value.endsWith("\"")) {
+                //    value = value.substring(1, value.length() - 1);
+                //}
+
+                cookiesMap.put(key, value);
+            }
+        }
+
+        return cookiesMap;
     }
 }
