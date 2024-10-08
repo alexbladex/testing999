@@ -43,8 +43,15 @@ public class CurlEmulation {
         String redirect_url = map.get("redirect_url");
 
 //        map.forEach((k, v) -> System.out.println(k + ": " + v));
+//        =============
 //        for (Map.Entry<String, String> entry : map.entrySet()){
 //            System.out.println(entry.getKey() + "/" + entry.getValue());
+//        }
+//        =============
+//        Iterator<Map.Entry<String, String>> iterator = map.entrySet().iterator();
+//        while (iterator.hasNext()) {
+//            Map.Entry<String, String> entry = iterator.next();
+//            System.out.println(entry.getKey() + ": " + entry.getValue());
 //        }
 
         // Выводим в консоль весь заголовок ответа на первый запрос
