@@ -1,28 +1,23 @@
 curl -v https://simpalsid.com/user/login | grep -v '<'
 
 curl -v -X POST https://simpalsid.com/user/login \
--d "_xsrf=2|10a07715|c18be39751315fce4fe1fd32c26649fb|1727679757&redirect_url=https://999.md&login=user&password=pswd" \
+-d "_xsrf=2|bddc729c|001664e0480f8b6787f257125b4bc159|1728527516&redirect_url=https://999.md&login=user&password=123456" \
 -H "accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9" \
 -H "accept-language: en-US,en;q=0.9" \
 -H "accept-encoding: gzip, deflate, br" \
 -H "cache-control: max-age=0" \
--H "connection: keep-alive" \
 -H "content-type: application/x-www-form-urlencoded" \
--H "cookie: _xsrf=2|10a07715|c18be39751315fce4fe1fd32c26649fb|1727679757; redirect_url=\"https://999.md\"" \
--H "host: simpalsid.com" \
--H "origin: https://simpalsid.com" \
+-H "cookie: _xsrf=2|bddc729c|001664e0480f8b6787f257125b4bc159|1728527516; redirect_url=https://999.md" \
 -H "referer: https://simpalsid.com/user/login" \
 -H "user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
 
-curl -v "https://999.md/external/auth/log_in?token=78ef37cd0f16b69f3ceb40c940c1892f5efc08d8d15dfa7bc8d20f1f21431da6062a0e710634a572e533ec845f871722537bab56d9b449a2a80ff794a8b999d163aec7cf23ad8f7e10cb15fca46d2e7d4869d220a7506b743cc3a67ec487d9e773fb6e7a09b262f00811a522b2fba69d308d12bfdfa907c1aca1e290b7f6e4e1e1846fab32e1bf77336e3736d00391b4b5d39712dd55c716957be8f4c46c36677d675e9939c786d7e88c7eeb4434146088ddea9d625ecd4506ee56c14ab295cc&token2=2|1:0|10:1727679801|4:auth|512:NzhlZjM3Y2QwZjE2YjY5ZjNjZWI0MGM5NDBjMTg5MmY1ZWZjMDhkOGQxNWRmYTdiYzhkMjBmMWYyMTQzMWRhNjA2MmEwZTcxMDYzNGE1NzJlNTMzZWM4NDVmODcxNzIyNTM3YmFiNTZkOWI0NDlhMmE4MGZmNzk0YThiOTk5ZDE2M2FlYzdjZjIzYWQ4ZjdlMTBjYjE1ZmNhNDZkMmU3ZDQ4NjlkMjIwYTc1MDZiNzQzY2MzYTY3ZWM0ODdkOWU3NzNmYjZlN2EwOWIyNjJmMDA4MTFhNTIyYjJmYmE2OWQzMDhkMTJiZmRmYTkwN2MxYWNhMWUyOTBiN2Y2ZTRlMWUxODQ2ZmFiMzJlMWJmNzczMzZlMzczNmQwMDM5MWI0YjVkMzk3MTJkZDU1YzcxNjk1N2JlOGY0YzQ2YzM2Njc3ZDY3NWU5OTM5Yzc4NmQ3ZTg4YzdlZWI0NDM0MTQ2MDg4ZGRlYTlkNjI1ZWNkNDUwNmVlNTZjMTRhYjI5NWNj|67ad29d124c18b46f4ecd31171026bcd7a2123980be62ed27ae28724cb7ea419&redirect_url=https://999.md" \
+curl -v "https://999.md/external/auth/log_in?token=e629dc68f4e1e09ed7d1e1b44b1787baca157d3e7bf70913be61958a4892d746ed555a2fb0b5e3ea2f6b1a0d03e4ac22572ac1def5784e83598ba6c25cd709f028b106010a3644d6218d86ecf98ae75a3863a93eba89931da4b8a87c1d74e33f03f8607148527d944fa5166ad18a45cc3db654844db2582dd11bb161d81a57c9e9494da220ab97e080827468e4ca866e59567fdd8d364a64c0ace339deaef1fdce2cb3c1dec67aa0bf54ceab2ebcb939d8ba9fb65635867a6cef826aeeb34f70&token2=2|1:0|10:1728527559|4:auth|512:ZTYyOWRjNjhmNGUxZTA5ZWQ3ZDFlMWI0NGIxNzg3YmFjYTE1N2QzZTdiZjcwOTEzYmU2MTk1OGE0ODkyZDc0NmVkNTU1YTJmYjBiNWUzZWEyZjZiMWEwZDAzZTRhYzIyNTcyYWMxZGVmNTc4NGU4MzU5OGJhNmMyNWNkNzA5ZjAyOGIxMDYwMTBhMzY0NGQ2MjE4ZDg2ZWNmOThhZTc1YTM4NjNhOTNlYmE4OTkzMWRhNGI4YTg3YzFkNzRlMzNmMDNmODYwNzE0ODUyN2Q5NDRmYTUxNjZhZDE4YTQ1Y2MzZGI2NTQ4NDRkYjI1ODJkZDExYmIxNjFkODFhNTdjOWU5NDk0ZGEyMjBhYjk3ZTA4MDgyNzQ2OGU0Y2E4NjZlNTk1NjdmZGQ4ZDM2NGE2NGMwYWNlMzM5ZGVhZWYxZmRjZTJjYjNjMWRlYzY3YWEwYmY1NGNlYWIyZWJjYjkzOWQ4YmE5ZmI2NTYzNTg2N2E2Y2VmODI2YWVlYjM0Zjcw|4706be0984ae793a0597943aad6dcb7694dcde3fbd7450018c3550434e2bc8f3&redirect_url=https://999.md" \
 -H "accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9" \
 -H "accept-language: en-US,en;q=0.9" \
 -H "accept-encoding: gzip, deflate, br" \
 -H "cache-control: max-age=0" \
--H "connection: keep-alive" \
--H "host: 999.md" \
 -H "referer: https://simpalsid.com/user/login" \
 -H "user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
 
 curl -v https://999.md \
--H "cookie: simpalsid.auth=78ef37cd0f16b69f3ceb40c940c1892f5efc08d8d15dfa7bc8d20f1f21431da6062a0e710634a572e533ec845f871722537bab56d9b449a2a80ff794a8b999d163aec7cf23ad8f7e10cb15fca46d2e7d4869d220a7506b743cc3a67ec487d9e773fb6e7a09b262f00811a522b2fba69d308d12bfdfa907c1aca1e290b7f6e4e1e1846fab32e1bf77336e3736d00391b4b5d39712dd55c716957be8f4c46c36677d675e9939c786d7e88c7eeb4434146088ddea9d625ecd4506ee56c14ab295cc; auth=\"2|1:0|10:1727679801|4:auth|512:NzhlZjM3Y2QwZjE2YjY5ZjNjZWI0MGM5NDBjMTg5MmY1ZWZjMDhkOGQxNWRmYTdiYzhkMjBmMWYyMTQzMWRhNjA2MmEwZTcxMDYzNGE1NzJlNTMzZWM4NDVmODcxNzIyNTM3YmFiNTZkOWI0NDlhMmE4MGZmNzk0YThiOTk5ZDE2M2FlYzdjZjIzYWQ4ZjdlMTBjYjE1ZmNhNDZkMmU3ZDQ4NjlkMjIwYTc1MDZiNzQzY2MzYTY3ZWM0ODdkOWU3NzNmYjZlN2EwOWIyNjJmMDA4MTFhNTIyYjJmYmE2OWQzMDhkMTJiZmRmYTkwN2MxYWNhMWUyOTBiN2Y2ZTRlMWUxODQ2ZmFiMzJlMWJmNzczMzZlMzczNmQwMDM5MWI0YjVkMzk3MTJkZDU1YzcxNjk1N2JlOGY0YzQ2YzM2Njc3ZDY3NWU5OTM5Yzc4NmQ3ZTg4YzdlZWI0NDM0MTQ2MDg4ZGRlYTlkNjI1ZWNkNDUwNmVlNTZjMTRhYjI5NWNj|67ad29d124c18b46f4ecd31171026bcd7a2123980be62ed27ae28724cb7ea419\""
+-H "cookie: simpalsid.auth=e629dc68f4e1e09ed7d1e1b44b1787baca157d3e7bf70913be61958a4892d746ed555a2fb0b5e3ea2f6b1a0d03e4ac22572ac1def5784e83598ba6c25cd709f028b106010a3644d6218d86ecf98ae75a3863a93eba89931da4b8a87c1d74e33f03f8607148527d944fa5166ad18a45cc3db654844db2582dd11bb161d81a57c9e9494da220ab97e080827468e4ca866e59567fdd8d364a64c0ace339deaef1fdce2cb3c1dec67aa0bf54ceab2ebcb939d8ba9fb65635867a6cef826aeeb34f70; auth=2|1:0|10:1728527559|4:auth|512:ZTYyOWRjNjhmNGUxZTA5ZWQ3ZDFlMWI0NGIxNzg3YmFjYTE1N2QzZTdiZjcwOTEzYmU2MTk1OGE0ODkyZDc0NmVkNTU1YTJmYjBiNWUzZWEyZjZiMWEwZDAzZTRhYzIyNTcyYWMxZGVmNTc4NGU4MzU5OGJhNmMyNWNkNzA5ZjAyOGIxMDYwMTBhMzY0NGQ2MjE4ZDg2ZWNmOThhZTc1YTM4NjNhOTNlYmE4OTkzMWRhNGI4YTg3YzFkNzRlMzNmMDNmODYwNzE0ODUyN2Q5NDRmYTUxNjZhZDE4YTQ1Y2MzZGI2NTQ4NDRkYjI1ODJkZDExYmIxNjFkODFhNTdjOWU5NDk0ZGEyMjBhYjk3ZTA4MDgyNzQ2OGU0Y2E4NjZlNTk1NjdmZGQ4ZDM2NGE2NGMwYWNlMzM5ZGVhZWYxZmRjZTJjYjNjMWRlYzY3YWEwYmY1NGNlYWIyZWJjYjkzOWQ4YmE5ZmI2NTYzNTg2N2E2Y2VmODI2YWVlYjM0Zjcw|4706be0984ae793a0597943aad6dcb7694dcde3fbd7450018c3550434e2bc8f3"
