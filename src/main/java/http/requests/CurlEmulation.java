@@ -1,8 +1,6 @@
 package http.requests;
 
 import gui.interaction.PropertyReader;
-
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -12,7 +10,6 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -148,7 +145,8 @@ public class CurlEmulation {
                 .build();
 
         // Отправляем запрос и получаем ответ в виде массива байт
-        HttpResponse<byte[]> siteResponse = client.send(siteRequest, HttpResponse.BodyHandlers.ofByteArray());
+//        HttpResponse<byte[]> siteResponse = client.send(siteRequest, HttpResponse.BodyHandlers.ofByteArray());
+        HttpResponse<InputStream> siteResponse = client.send(siteRequest, HttpResponse.BodyHandlers.ofInputStream());
         map = extractCookies(siteResponse);
 
         String utid = map.get("utid");
@@ -160,24 +158,20 @@ public class CurlEmulation {
         });
         System.out.println(utid);
 
+        InputStream inputStream = siteResponse.body();
+        String decompressedBody;
+
         // Проверяем, сжат ли ответ
         if (siteResponse.headers().firstValue("content-encoding").orElse("").contains("gzip")) {
             // Распаковка GZIP
-            InputStream inputStream = new ByteArrayInputStream(siteResponse.body());
             GZIPInputStream gzipStream = new GZIPInputStream(inputStream);
-
-            // Чтение распакованного ответа
-            String decompressedBody = new String(gzipStream.readAllBytes(), StandardCharsets.UTF_8);
-
-            // Выводим распакованное тело ответа
-            System.out.println("\nDecompressed Response Body (GET):");
-            System.out.println(decompressedBody);
+            decompressedBody = new String(gzipStream.readAllBytes(), StandardCharsets.UTF_8);
         } else {
-            // Если ответ не сжат, просто выводим его как есть
-            String responseBody = new String(siteResponse.body(), StandardCharsets.UTF_8);
-            System.out.println("\nResponse Body (GET):");
-            System.out.println(responseBody);
+            decompressedBody = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         }
+        // Выводим тело ответа
+        System.out.println("\nResponse Body (GET):");
+        System.out.println(decompressedBody);
 
     }
     public static <T> HashMap<String, String> extractCookies(HttpResponse<T> response) {

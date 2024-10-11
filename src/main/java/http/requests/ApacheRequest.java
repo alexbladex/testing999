@@ -6,12 +6,11 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -19,16 +18,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 public class ApacheRequest {
     public static void main(String[] args) throws Exception {
         String uri, user, pswd;
-        uri = PropertyReader.getProperty("simpalsUriLogin"); //https://simpalsid.com/user/login
+        uri = PropertyReader.getProperty("simpalsUriLogin");
         user = PropertyReader.getProperty("user68");
         pswd = PropertyReader.getProperty("pswd68");
         HashMap<String, String> map = null;
 
-        CloseableHttpClient client = HttpClients.createDefault();
+        CloseableHttpClient client = HttpClients.createMinimal();
 
         // Первый GET запрос
         HttpGet getRequest = new HttpGet(new URI(uri));
@@ -49,7 +49,6 @@ public class ApacheRequest {
 
         System.out.println("XSRF Token: " + _xsrf);
         System.out.println("Redirect URL: " + redirect_url);
-        getResponse.close();
 
         // Второй POST запрос
         String postData = String.format("_xsrf=%s&redirect_url=%s&login=%s&password=%s", _xsrf, redirect_url, user, pswd);
@@ -95,20 +94,10 @@ public class ApacheRequest {
                 URLEncoder.encode(token2, StandardCharsets.UTF_8),
                 URLEncoder.encode(redirect_url, StandardCharsets.UTF_8));
         System.out.println("Сформированный URL: " + location);
-        postResponse.close();
 
         // Третий GET запрос
         HttpGet redirectRequest = new HttpGet(new URI(location));
-//        setCommonHeaders(redirectRequest);
-        redirectRequest.setHeader("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
-        redirectRequest.setHeader("accept-language", "en-US,en;q=0.9");
-        redirectRequest.setHeader("accept-encoding", "gzip, deflate, br");
-        redirectRequest.setHeader("cache-control", "max-age=0");
-        redirectRequest.setHeader("connection", "keep-alive");
-        redirectRequest.setHeader("host", "999.md");
-        redirectRequest.setHeader("referer", "https://simpalsid.com/user/login");
-        redirectRequest.setHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36");
-
+        setCommonHeaders(redirectRequest);
         CloseableHttpResponse redirectResponse = client.execute(redirectRequest);
 
         // Выводим в консоль заголовок ответа на первый запрос
@@ -132,33 +121,44 @@ public class ApacheRequest {
         System.out.println("AUTH Token: " + auth);
         System.out.println("SimpalsAuth Token: " + simpalsid_auth);
         System.out.println("Redirect URL: " + location);
-        redirectResponse.close();
 
         // Четвертый GET запрос
-//        HttpGet finalRequest = new HttpGet(new URI(location));
-//        setCommonHeaders(finalRequest);
-//        finalRequest.setHeader("cookie", String.format("simpalsid.auth=%s; auth=%s", simpalsid_auth, auth));
-//        CloseableHttpResponse finalResponse = client.execute(finalRequest);
-//
-//        System.out.println("4:Response Status (GET): " + finalResponse.getStatusLine());
-//        Arrays.stream(finalResponse.getAllHeaders()).forEach(header ->
-//                System.out.println(header.getName() + ": " + header.getValue())
-//        );
-//
-//        // Извлекаем utid из ответа
-//        map = extractCookies(finalResponse);
-//
-//        String utid = map.get("utid");
-//
-//        System.out.println("UTID: " + utid);
-//
-//        // Выводим тело ответа на четвертый запрос
-//        String getResponseBody = EntityUtils.toString(finalResponse.getEntity());
-//        System.out.println("Response Body (GET):");
-//        System.out.println(getResponseBody);
-//        finalResponse.close();
+        HttpGet finalRequest = new HttpGet(new URI(location));
+        setCommonHeaders(finalRequest);
+        finalRequest.setHeader("cookie", String.format("simpalsid.auth=%s; auth=%s", simpalsid_auth, auth));
+        CloseableHttpResponse finalResponse = client.execute(finalRequest);
+
+        System.out.println("\nResponse Status (GET): " + finalResponse.getStatusLine());
+        Arrays.stream(finalResponse.getAllHeaders()).forEach(header ->
+                System.out.println(header.getName() + ": " + header.getValue())
+        );
+
+        // Извлекаем utid из ответа
+        map = extractCookies(finalResponse);
+
+        String utid = map.get("utid");
+
+        System.out.println("UTID: " + utid);
+
+        // Выводим тело ответа на четвертый запрос
+        InputStream inputStream = finalResponse.getEntity().getContent();
+        String decompressedBody;
+
+        if (finalResponse.getFirstHeader("Content-Encoding").getValue().contains("gzip")) {
+            GZIPInputStream gzipStream = new GZIPInputStream(inputStream);
+            decompressedBody = new String(gzipStream.readAllBytes(), StandardCharsets.UTF_8);
+        } else {
+            decompressedBody = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        }
+        // Выводим тело ответа
+        System.out.println("\nResponse Body (GET):");
+        System.out.println(decompressedBody);
 
         // Закрываем соединения
+        getResponse.close();
+        postResponse.close();
+        redirectResponse.close();
+        finalResponse.close();
         client.close();
 
     }
@@ -204,8 +204,6 @@ public class ApacheRequest {
         postRequest.setHeader("connection", "keep-alive");
         postRequest.setHeader("content-type", "application/x-www-form-urlencoded");
         postRequest.setHeader("cookie", String.format("_xsrf=%s; redirect_url=%s", xsrf, redirect_url));
-        postRequest.setHeader("host", "simpalsid.com");
-        postRequest.setHeader("origin", "https://simpalsid.com");
         postRequest.setHeader("referer", "https://simpalsid.com/user/login");
         postRequest.setHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36");
     }
