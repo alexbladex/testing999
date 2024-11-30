@@ -1,28 +1,30 @@
 package http.requests;
 import gui.interaction.PropertyReader;
-import org.apache.http.Header;
-import org.apache.http.NameValuePair;
+import org.apache.http.*;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.*;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.cookie.Cookie;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HttpCoreContext;
 import org.apache.http.util.EntityUtils;
 
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponseInterceptor;
 public class СClient {
     public static void main(String[] args) throws Exception {
         String uri, user, pswd;
@@ -58,23 +60,60 @@ public class СClient {
             }
         };
 
-        CookieStore cookieStore = new LenientCookieStore();
+        CookieStore cookieStore = new BasicCookieStore(); //LenientCookieStore
 
         RequestConfig requestConfig = RequestConfig.custom()
                 .setCookieSpec(CookieSpecs.STANDARD) // Менее строгая спецификация
                 .setRedirectsEnabled(true)
+                .setMaxRedirects(8)
                 .build();
 
         CloseableHttpClient client = HttpClients.custom()
-                .addInterceptorFirst(requestLogger)  // Logs requests
+                //.addInterceptorFirst(requestLogger)  // Logs requests
                 //.addInterceptorFirst(responseLogger) // Logs responses
+                .addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
+                    System.out.println("\nHTTP Request:");
+
+                    // Получаем информацию о хосте из HttpContext
+                    HttpHost targetHost = (HttpHost) context.getAttribute(HttpCoreContext.HTTP_TARGET_HOST);
+                    if (targetHost != null) {
+                        // Формируем полный URL
+                        String fullUrl = targetHost.toURI() + request.getRequestLine().getUri();
+                        System.out.println(request.getRequestLine().getMethod() + " " + fullUrl + " " + request.getRequestLine().getProtocolVersion());
+                    } else {
+                        // Если хост недоступен, выводим оригинальный запрос
+                        System.out.println(request.getRequestLine());
+                    }
+
+                    for (Header header : request.getAllHeaders()) {
+                        System.out.println(header.getName() + ": " + header.getValue());
+                    }
+                    System.out.println();
+                })
                 .setDefaultCookieStore(cookieStore)
                 .setDefaultRequestConfig(requestConfig)
-                .setRedirectStrategy(new CustomRedirectStrategy())
+                .setRedirectStrategy(new LaxRedirectStrategy() {
+                    @Override
+                    public HttpUriRequest getRedirect(HttpRequest request, HttpResponse response, HttpContext context) throws ProtocolException {
+                        /*System.out.printf("\nRequest Header: %s \n", request.getRequestLine());
+                        for (Header header : request.getAllHeaders()) {
+                            System.out.println(header.getName() + ": " + header.getValue());
+                        }*/
+
+                        System.out.printf("\nResponse Header: %s \n", response.getStatusLine());
+                        for (Header header : response.getAllHeaders()) {
+                            System.out.println(header.getName() + ": " + header.getValue());
+                        }
+
+                        String location = response.getFirstHeader("Location").getValue();
+                        URI encodedUri = URI.create(location.replace("|", "%7C").replace(" ", "%20"));
+                        return RequestBuilder.get(encodedUri).build();
+                    }
+                })
                 .build();
 
-//        HttpClientContext context = HttpClientContext.create();
-//        context.setCookieStore(cookieStore);
+        // Контекст для отслеживания редиректов
+        HttpClientContext context = HttpClientContext.create();
 
 //        CloseableHttpClient client = HttpClients.createMinimal();
 
@@ -85,7 +124,7 @@ public class СClient {
 
         // Выводим в консоль ответ
         System.out.println("Отправленный URI: " + getLogin.getURI());
-        System.out.println("Response Status (GET): " + getLoginResponse.getStatusLine());
+        System.out.println("Response (GET): " + getLoginResponse.getStatusLine());
         String _xsrf = null;
         String redirect_url = null;
         for (Cookie cookie : cookieStore.getCookies()) {
@@ -99,7 +138,6 @@ public class СClient {
                 .findFirst()
                 .orElse(null);*/
 
-        getLoginResponse.close();
 
         /*Arrays.stream(getLoginResponse.getAllHeaders()).forEach(header ->
                 System.out.println(header.getName() + ": " + header.getValue())
@@ -124,28 +162,41 @@ public class СClient {
         postLogin.setEntity(new UrlEncodedFormEntity(params)); //automatically set (content-type: application/x-www-form-urlencoded)
 
         setCommonHeaders(postLogin);
-        CloseableHttpResponse postLoginResponse = client.execute(postLogin);
+        CloseableHttpResponse postLoginResponse = client.execute(postLogin, context);
 
-        // Выводим в консоль ответ
-        System.out.println("Отправленный URI: " + getLogin.getURI());
-        System.out.println("Response Status (POST): " + postLoginResponse.getStatusLine());
+        // Логирование всех редиректов
+        if (context.getRedirectLocations() != null) {
+            context.getRedirectLocations().forEach(location -> {
+                System.out.println("Redirect to: " + location);
+            });
+        }
+
+        // Выводим заголовок
+        System.out.println("Response (): " + postLoginResponse.getStatusLine());
+        for (var header : postLoginResponse.getAllHeaders()) {
+            System.out.println(header.getName() + ": " + header.getValue());
+        }
+
         String auth = null;
         String simpalsid_auth = null;
         String utid = null;
         String tid = null;
-        for (Cookie cookie : cookieStore.getCookies()) {
+        /*for (Cookie cookie : cookieStore.getCookies()) {
             System.out.println(cookie.getName() + ": " + cookie.getValue());
             if (cookie.getName().equals("auth")) auth = cookie.getValue();
             if (cookie.getName().equals("simpalsid.auth")) simpalsid_auth = cookie.getValue();
             if (cookie.getName().equals("utid")) utid = cookie.getValue();
             if (cookie.getName().equals("tid")) tid = cookie.getValue();
-        }
+        }*/
 
-        // Выводим ответ
+        // Выводим тело
         String getResponseBody = EntityUtils.toString(postLoginResponse.getEntity());
         System.out.println("GET Response Body: " + getResponseBody);
 
+        /////////////////////////
+        getLoginResponse.close();
         postLoginResponse.close();
+        client.close();
     }
     public static HashMap<String, String> extractCookies(CloseableHttpResponse response) {
         HashMap<String, String> cookiesMap = new HashMap<>();
