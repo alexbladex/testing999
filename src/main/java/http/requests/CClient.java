@@ -17,15 +17,12 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpCoreContext;
 import org.apache.http.util.EntityUtils;
 
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class СClient {
+public class CClient {
     public static void main(String[] args) throws Exception {
         String uri, user, pswd;
         uri = PropertyReader.getProperty("simpalsUriLogin");
@@ -94,7 +91,7 @@ public class СClient {
                 .setDefaultRequestConfig(requestConfig)
                 .setRedirectStrategy(new LaxRedirectStrategy() {
                     @Override
-                    public HttpUriRequest getRedirect(HttpRequest request, HttpResponse response, HttpContext context) throws ProtocolException {
+                    public HttpUriRequest getRedirect(HttpRequest request, HttpResponse response, HttpContext context) {
                         /*System.out.printf("\nRequest Header: %s \n", request.getRequestLine());
                         for (Header header : request.getAllHeaders()) {
                             System.out.println(header.getName() + ": " + header.getValue());
@@ -166,9 +163,7 @@ public class СClient {
 
         // Логирование всех редиректов
         if (context.getRedirectLocations() != null) {
-            context.getRedirectLocations().forEach(location -> {
-                System.out.println("Redirect to: " + location);
-            });
+            context.getRedirectLocations().forEach(location -> System.out.println("Redirect to: " + location));
         }
 
         // Выводим заголовок
