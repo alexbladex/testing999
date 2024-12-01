@@ -1,19 +1,19 @@
 package http.requests;
 import gui.interaction.PropertyReader;
 import org.apache.http.*;
-import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.cookie.Cookie;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.*;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpCoreContext;
 import org.apache.http.util.EntityUtils;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,40 +22,51 @@ import java.util.List;
 public class CClient {
     public static void main(String[] args) throws Exception {
         String uri, user, pswd;
-        uri = PropertyReader.getProperty("simpalsUriLogin");
+        uri = PropertyReader.getProperty("999Login");
         user = PropertyReader.getProperty("user");
         pswd = PropertyReader.getProperty("pswd");
         HashMap<String, String> map = null;
 
-        // Create a custom request logging interceptor
+        // Custom request logging interceptor
         HttpRequestInterceptor requestLogger = (request, context) -> {
-            System.out.println("Request Line: " + request.getRequestLine());
-            System.out.println("Headers:");
-            for (var header : request.getAllHeaders()) {
+            HttpHost targetHost = (HttpHost) context.getAttribute(HttpCoreContext.HTTP_TARGET_HOST);
+            if (targetHost != null) {
+                String fullUrl = targetHost.toURI() + request.getRequestLine().getUri();
+                System.out.println(request.getRequestLine().getMethod() + " " + fullUrl);
+            } else {
+                System.out.println(request.getRequestLine());
+            }
+            for (Header header : request.getAllHeaders()) {
                 System.out.println(header.getName() + ": " + header.getValue());
             }
-
-            if (request instanceof HttpPost) {
-                HttpPost postRequest = (HttpPost) request;
-                if (postRequest.getEntity() != null) {
+            if (request instanceof HttpEntityEnclosingRequest) {
+                HttpEntityEnclosingRequest entityRequest = (HttpEntityEnclosingRequest) request;
+                HttpEntity originalEntity = entityRequest.getEntity();
+                if (originalEntity != null) {
+                    final byte[] bodyBytes;
+                    try (InputStream content = originalEntity.getContent()) {
+                        bodyBytes = content.readAllBytes();
+                    }
                     System.out.println("Body:");
-                    var entity = postRequest.getEntity();
-                    var body = entity.getContent().readAllBytes(); // Считываем тело запроса
-                    System.out.println(new String(body)); // Логируем тело запроса
+                    System.out.println(new String(bodyBytes));
+                    // ByteArrayEntity replaces the entity. If you need to log the body while preserving the original request entity, use HttpEntityWrapper.
+                    entityRequest.setEntity(new ByteArrayEntity(bodyBytes, ContentType.get(originalEntity)));
                 }
             }
+            System.out.println();
         };
 
-        // Create a custom response logging interceptor
+        // Custom response logging interceptor
         HttpResponseInterceptor responseLogger = (response, context) -> {
-            System.out.println("Response: " + response.getStatusLine());
-            if (response.getEntity() != null) {
-                System.out.println("Response Body: " + EntityUtils.toString(response.getEntity()));
+            System.out.println(response.getStatusLine());
+            for (Header header : response.getAllHeaders()) {
+                System.out.println(header.getName() + ": " + header.getValue());
             }
+            System.out.println();
         };
 
-        CookieStore cookieStore = new BasicCookieStore(); //LenientCookieStore
-
+        //CookieStore cookieStore = new BasicCookieStore(); //LenientCookieStore
+        CookieStorage cookieStore = new CookieStorage();
         RequestConfig requestConfig = RequestConfig.custom()
                 .setCookieSpec(CookieSpecs.STANDARD) // Менее строгая спецификация
                 .setRedirectsEnabled(true)
@@ -63,27 +74,8 @@ public class CClient {
                 .build();
 
         CloseableHttpClient client = HttpClients.custom()
-                .addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
-                    HttpHost targetHost = (HttpHost) context.getAttribute(HttpCoreContext.HTTP_TARGET_HOST);
-                    if (targetHost != null) {
-                        String fullUrl = targetHost.toURI() + request.getRequestLine().getUri();
-                        System.out.println(request.getRequestLine().getMethod() + " " + fullUrl + " " + request.getRequestLine().getProtocolVersion());
-                    } else {
-                        System.out.println(request.getRequestLine());
-                    }
-
-                    for (Header header : request.getAllHeaders()) {
-                        System.out.println(header.getName() + ": " + header.getValue());
-                    }
-                    System.out.println();
-                })
-                .addInterceptorLast((HttpResponseInterceptor) (response, context) -> {
-                    System.out.println(response.getStatusLine());
-                    for (Header header : response.getAllHeaders()) {
-                        System.out.println(header.getName() + ": " + header.getValue());
-                    }
-                    System.out.println();
-                })
+                .addInterceptorFirst(requestLogger)
+                .addInterceptorLast(responseLogger)
                 .setDefaultCookieStore(cookieStore)
                 .setDefaultRequestConfig(requestConfig)
                 .setRedirectStrategy(new LaxRedirectStrategy() {
@@ -100,26 +92,17 @@ public class CClient {
         HttpGet getLogin = new HttpGet(new URI(uri));
         setCommonHeaders(getLogin);
         CloseableHttpResponse getLoginResponse = client.execute(getLogin);
-
-        // Выводим в консоль ответ
-        String _xsrf = null;
-        String redirect_url = null;
-        for (Cookie cookie : cookieStore.getCookies()) {
-            System.out.println(cookie.getName() + ": " + cookie.getValue());
-            if (cookie.getName().equals("_xsrf")) _xsrf = cookie.getValue();
-            if (cookie.getName().equals("redirect_url")) redirect_url = cookie.getValue();
-        }
+        getLoginResponse.close();
 
         // 2. POST запрос
         HttpPost postLogin = new HttpPost(new URI(uri));
 
         List<NameValuePair> params = new ArrayList<>();
-        params.add(new BasicNameValuePair("_xsrf", _xsrf));
-        params.add(new BasicNameValuePair("redirect_url", redirect_url));
+        params.add(new BasicNameValuePair("_xsrf", cookieStore.getCookieByName("_xsrf")));
+        params.add(new BasicNameValuePair("redirect_url", cookieStore.getCookieByName("redirect_url")));
         params.add(new BasicNameValuePair("login", user));
         params.add(new BasicNameValuePair("password", pswd));
         postLogin.setEntity(new UrlEncodedFormEntity(params)); //automatically set (content-type: application/x-www-form-urlencoded)
-
         setCommonHeaders(postLogin);
         CloseableHttpResponse postLoginResponse = client.execute(postLogin);
 
@@ -138,10 +121,9 @@ public class CClient {
         // Выводим тело
         String getResponseBody = EntityUtils.toString(postLoginResponse.getEntity());
         System.out.println("GET Response Body: " + getResponseBody);
+        postLoginResponse.close();
 
         /////////////////////////
-        getLoginResponse.close();
-        postLoginResponse.close();
         client.close();
     }
     private static void setCommonHeaders(HttpRequestBase request) {
