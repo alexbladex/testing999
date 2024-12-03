@@ -1,10 +1,12 @@
 package http.requests;
+
 import gui.interaction.PropertyReader;
 import org.apache.http.*;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.*;
@@ -12,11 +14,12 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpCoreContext;
 import org.apache.http.util.EntityUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class CClient {
@@ -25,7 +28,6 @@ public class CClient {
         uri = PropertyReader.getProperty("999Login");
         user = PropertyReader.getProperty("user");
         pswd = PropertyReader.getProperty("pswd");
-        HashMap<String, String> map = null;
 
         // Custom request logging interceptor
         HttpRequestInterceptor requestLogger = (request, context) -> {
@@ -39,8 +41,7 @@ public class CClient {
             for (Header header : request.getAllHeaders()) {
                 System.out.println(header.getName() + ": " + header.getValue());
             }
-            if (request instanceof HttpEntityEnclosingRequest) {
-                HttpEntityEnclosingRequest entityRequest = (HttpEntityEnclosingRequest) request;
+            if (request instanceof HttpEntityEnclosingRequest entityRequest) {
                 HttpEntity originalEntity = entityRequest.getEntity();
                 if (originalEntity != null) {
                     final byte[] bodyBytes;
@@ -94,7 +95,7 @@ public class CClient {
         CloseableHttpResponse getLoginResponse = client.execute(getLogin);
         getLoginResponse.close();
 
-        // 2. POST запрос
+        // 2. Login POST Entity
         HttpPost postLogin = new HttpPost(new URI(uri));
 
         List<NameValuePair> params = new ArrayList<>();
@@ -106,22 +107,38 @@ public class CClient {
         setCommonHeaders(postLogin);
         CloseableHttpResponse postLoginResponse = client.execute(postLogin);
 
-        String auth = null;
-        String simpalsid_auth = null;
-        String utid = null;
-        String tid = null;
-        /*for (Cookie cookie : cookieStore.getCookies()) {
-            System.out.println(cookie.getName() + ": " + cookie.getValue());
-            if (cookie.getName().equals("auth")) auth = cookie.getValue();
-            if (cookie.getName().equals("simpalsid.auth")) simpalsid_auth = cookie.getValue();
-            if (cookie.getName().equals("utid")) utid = cookie.getValue();
-            if (cookie.getName().equals("tid")) tid = cookie.getValue();
-        }*/
-
         // Выводим тело
         String getResponseBody = EntityUtils.toString(postLoginResponse.getEntity());
         System.out.println("GET Response Body: " + getResponseBody);
         postLoginResponse.close();
+
+
+        // 3. Open Ad Pages
+        String adPages = "https://999.md/add?category=construction-and-repair&subcategory=construction-and-repair/finishing-and-facing-materials";
+        HttpGet get999 = new HttpGet(new URI(adPages));
+        setCommonHeaders(get999);
+        get999.setHeader("Referer", "https://999.md");
+        CloseableHttpResponse get999Response = client.execute(get999);
+
+        String auth = null, simpalsid_auth = null, utid = null, tid = null;
+
+        for (Cookie cookie : cookieStore.getCookies()) {
+            System.out.println(cookie.getName() + ": " + cookie.getValue());
+        }
+
+        getResponseBody = EntityUtils.toString(get999Response.getEntity());
+        // Парсинг HTML с помощью JSoup
+        Document doc = Jsoup.parse(getResponseBody);
+        // один из куков как input xsrf
+        String xsrfValue = doc.select("input[name=_xsrf]").attr("value");
+        String formIdValue = doc.select("input[name=form_id]").attr("value");
+
+        System.out.println("XSRF Value: " + xsrfValue);
+        System.out.println("Form ID Value: " + formIdValue);
+
+        System.out.println("GET Response Body: " + getResponseBody);
+
+        get999Response.close();
 
         /////////////////////////
         client.close();
