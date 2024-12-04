@@ -17,12 +17,16 @@ import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CClient {
+    private static CloseableHttpClient client;
+
     public static void main(String[] args) throws Exception {
         String uri, user, pswd;
         uri = PropertyReader.getProperty("999Login");
@@ -41,7 +45,7 @@ public class CClient {
             for (Header header : request.getAllHeaders()) {
                 System.out.println(header.getName() + ": " + header.getValue());
             }
-            if (request instanceof HttpEntityEnclosingRequest entityRequest) {
+            /*if (request instanceof HttpEntityEnclosingRequest entityRequest) {
                 HttpEntity originalEntity = entityRequest.getEntity();
                 if (originalEntity != null) {
                     final byte[] bodyBytes;
@@ -53,7 +57,7 @@ public class CClient {
                     // ByteArrayEntity replaces the entity. If you need to log the body while preserving the original request entity, use HttpEntityWrapper.
                     entityRequest.setEntity(new ByteArrayEntity(bodyBytes, ContentType.get(originalEntity)));
                 }
-            }
+            }*/
             System.out.println();
         };
 
@@ -74,7 +78,7 @@ public class CClient {
                 .setMaxRedirects(8)
                 .build();
 
-        CloseableHttpClient client = HttpClients.custom()
+        client = HttpClients.custom()
                 .addInterceptorFirst(requestLogger)
                 .addInterceptorLast(responseLogger)
                 .setDefaultCookieStore(cookieStore)
@@ -90,9 +94,7 @@ public class CClient {
                 .build();
 
         // 1. Login запрос
-        HttpGet getLogin = new HttpGet(new URI(uri));
-        setCommonHeaders(getLogin);
-        CloseableHttpResponse getLoginResponse = client.execute(getLogin);
+        CloseableHttpResponse getLoginResponse = httpGet(uri, uri);
         getLoginResponse.close();
 
         // 2. Login POST Entity
@@ -104,21 +106,20 @@ public class CClient {
         params.add(new BasicNameValuePair("login", user));
         params.add(new BasicNameValuePair("password", pswd));
         postLogin.setEntity(new UrlEncodedFormEntity(params)); //automatically set (content-type: application/x-www-form-urlencoded)
-        setCommonHeaders(postLogin);
+        setCommonHeaders(postLogin, uri);
         CloseableHttpResponse postLoginResponse = client.execute(postLogin);
 
         // Выводим тело
         String getResponseBody = EntityUtils.toString(postLoginResponse.getEntity());
-        System.out.println("GET Response Body: " + getResponseBody);
+        System.out.printf("GET Response Body: %s\n", getResponseBody);
         postLoginResponse.close();
 
 
         // 3. Open Ad Pages
         String adPages = "https://999.md/add?category=construction-and-repair&subcategory=construction-and-repair/finishing-and-facing-materials";
-        HttpGet get999 = new HttpGet(new URI(adPages));
-        setCommonHeaders(get999);
-        get999.setHeader("Referer", "https://999.md");
-        CloseableHttpResponse get999Response = client.execute(get999);
+        String page999 = "https://999.md";
+        CloseableHttpResponse get999Response = httpGet(adPages, page999);
+        getResponseBody = EntityUtils.toString(get999Response.getEntity());
 
         String auth = null, simpalsid_auth = null, utid = null, tid = null;
 
@@ -126,7 +127,6 @@ public class CClient {
             System.out.println(cookie.getName() + ": " + cookie.getValue());
         }
 
-        getResponseBody = EntityUtils.toString(get999Response.getEntity());
         // Парсинг HTML с помощью JSoup
         Document doc = Jsoup.parse(getResponseBody);
         // один из куков как input xsrf
@@ -135,7 +135,6 @@ public class CClient {
 
         System.out.println("XSRF Value: " + xsrfValue);
         System.out.println("Form ID Value: " + formIdValue);
-
         System.out.println("GET Response Body: " + getResponseBody);
 
         get999Response.close();
@@ -143,13 +142,19 @@ public class CClient {
         /////////////////////////
         client.close();
     }
-    private static void setCommonHeaders(HttpRequestBase request) {
+    public static CloseableHttpResponse httpGet(String url, String referer) throws URISyntaxException, IOException {
+        HttpGet getRequest = new HttpGet(new URI(url));
+        setCommonHeaders(getRequest, referer);
+
+        return client.execute(getRequest);
+    }
+    private static void setCommonHeaders(HttpRequestBase request, String referer) {
         request.setHeader("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
         request.setHeader("accept-language", "en-US,en;q=0.9");
         request.setHeader("accept-encoding", "gzip, deflate, br");
         request.setHeader("cache-control", "max-age=0");
         request.setHeader("connection", "keep-alive");
-        request.setHeader("referer", "https://simpalsid.com/user/login");
+        request.setHeader("referer", referer);
         request.setHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36");
     }
 }
