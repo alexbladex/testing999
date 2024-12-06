@@ -205,33 +205,35 @@ public class CClient {
         httpResponse = httpGet(agreeUrl, pageAd);
         httpResponse.close();
 
+        params = List.of(
+                new BasicNameValuePair("_xsrf", xsrfValue),
+                new BasicNameValuePair("form_id", formIdValue),
+                new BasicNameValuePair("category_url", "construction-and-repair"),
+                new BasicNameValuePair("subcategory_url", "construction-and-repair/finishing-and-facing-materials"),
+                new BasicNameValuePair("offer_type", "776"),
+                new BasicNameValuePair("12", "плитка размер 15*15 белая turkey"),
+                new BasicNameValuePair("13", "Настенная плитка кафель 15*15 цвет белая турция. 200 л/м2. Минимальный заказ 2 метра"),
+                new BasicNameValuePair("1404", ""),
+                new BasicNameValuePair("7", "12900"),
+                new BasicNameValuePair("2", "200"),
+                new BasicNameValuePair("2_unit", "mdl"),
+                new BasicNameValuePair("1640", ""),
+                new BasicNameValuePair("686", "21099"),
+                new BasicNameValuePair("5", "12869"),
+                new BasicNameValuePair("14", imageFileName),
+                new BasicNameValuePair("file", ""),
+                new BasicNameValuePair("video", ""),
+                new BasicNameValuePair("16", "37379169100"),
+                new BasicNameValuePair("country_prefix", "373"),
+                new BasicNameValuePair("number", ""),
+                new BasicNameValuePair("package_name", "basic"),
+                new BasicNameValuePair("agree", "1")
+        );
+
         // premoderate
         postRequest = new HttpPost(new URI(premoderateUrl));
         setCommonHeaders(postRequest, pageAd);
-        entity = MultipartEntityBuilder.create()
-                .addTextBody("_xsrf", xsrfValue, ContentType.TEXT_PLAIN )
-                .addTextBody("form_id", formIdValue, ContentType.TEXT_PLAIN )
-                .addTextBody("category_url", "construction-and-repair", ContentType.TEXT_PLAIN )
-                .addTextBody("subcategory_url", "construction-and-repair/finishing-and-facing-materials", ContentType.TEXT_PLAIN )
-                .addTextBody("offer_type", "776", ContentType.TEXT_PLAIN )
-                .addTextBody("12", "плитка размер 15*15 белая turkey", ContentType.TEXT_PLAIN.withCharset("UTF-8") )
-                .addTextBody("13", "Настенная плитка кафель 15*15 цвет белая турция. 200 л/м2. Минимальный заказ 2 метра", ContentType.TEXT_PLAIN.withCharset("UTF-8") )
-                .addTextBody("1404", "", ContentType.TEXT_PLAIN )
-                .addTextBody("7", "12900", ContentType.TEXT_PLAIN )
-                .addTextBody("2", "200", ContentType.TEXT_PLAIN )
-                .addTextBody("2_unit", "mdl", ContentType.TEXT_PLAIN )
-                .addTextBody("1640", "", ContentType.TEXT_PLAIN )
-                .addTextBody("686", "21099", ContentType.TEXT_PLAIN )
-                .addTextBody("5", "12869", ContentType.TEXT_PLAIN )
-                .addTextBody("14", imageFileName, ContentType.TEXT_PLAIN )
-                .addTextBody("video", "", ContentType.TEXT_PLAIN )
-                .addTextBody("16", "37379169100", ContentType.TEXT_PLAIN )
-                .addTextBody("country_prefix", "373", ContentType.TEXT_PLAIN )
-                .addTextBody("number", "", ContentType.TEXT_PLAIN )
-                .addTextBody("package_name", "basic", ContentType.TEXT_PLAIN )
-                .addTextBody("agree", "1", ContentType.TEXT_PLAIN)
-                .build();
-        postRequest.setEntity(entity);
+        postRequest.setEntity(buildMultipartEntity(params));
         httpResponse = client.execute(postRequest);
 
         // Выводим тело
@@ -242,29 +244,6 @@ public class CClient {
         // 6. Send Ad Form
         postRequest = new HttpPost(new URI(pageAd));
         setCommonHeaders(postRequest, pageAd);
-        params = new ArrayList<>();
-        params.add(new BasicNameValuePair("_xsrf", xsrfValue));
-        params.add(new BasicNameValuePair("form_id", formIdValue));
-        params.add(new BasicNameValuePair("category_url", "construction-and-repair"));
-        params.add(new BasicNameValuePair("subcategory_url", "construction-and-repair/finishing-and-facing-materials"));
-        params.add(new BasicNameValuePair("offer_type", "776"));
-        params.add(new BasicNameValuePair("12", "плитка размер 15*15 белая turkey"));
-        params.add(new BasicNameValuePair("13", "Настенная плитка кафель 15*15 цвет белая турция. 200 л/м2. Минимальный заказ 2 метра"));
-        params.add(new BasicNameValuePair("1404", ""));
-        params.add(new BasicNameValuePair("7", "12900"));
-        params.add(new BasicNameValuePair("2", "200"));
-        params.add(new BasicNameValuePair("2_unit", "mdl"));
-        params.add(new BasicNameValuePair("1640", ""));
-        params.add(new BasicNameValuePair("686", "21099"));
-        params.add(new BasicNameValuePair("5", "12869"));
-        params.add(new BasicNameValuePair("14", imageFileName));
-        params.add(new BasicNameValuePair("file", ""));
-        params.add(new BasicNameValuePair("video", ""));
-        params.add(new BasicNameValuePair("16", "37379169100"));
-        params.add(new BasicNameValuePair("country_prefix", "373"));
-        params.add(new BasicNameValuePair("number", ""));
-        params.add(new BasicNameValuePair("package_name", "basic"));
-        params.add(new BasicNameValuePair("agree", "1"));
         postRequest.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
         httpResponse = client.execute(postRequest);
 
@@ -276,7 +255,7 @@ public class CClient {
         /////////////////////////
         client.close();
     }
-    public static CloseableHttpResponse httpGet(String url, String referer) throws URISyntaxException, IOException {
+    private static CloseableHttpResponse httpGet(String url, String referer) throws URISyntaxException, IOException {
         HttpGet getRequest = new HttpGet(new URI(url));
         setCommonHeaders(getRequest, referer);
 
@@ -290,5 +269,12 @@ public class CClient {
         request.setHeader("connection", "keep-alive");
         request.setHeader("referer", referer);
         request.setHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36");
+    }
+    private static HttpEntity buildMultipartEntity(List<NameValuePair> params) {
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+        for (NameValuePair param : params) {
+            builder.addTextBody(param.getName(), param.getValue(), ContentType.TEXT_PLAIN.withCharset("UTF-8"));
+        }
+        return builder.build();
     }
 }
