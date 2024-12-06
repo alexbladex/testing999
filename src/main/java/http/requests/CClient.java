@@ -21,6 +21,7 @@ import org.apache.http.entity.mime.content.FileBody;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -32,17 +33,15 @@ public class CClient {
     private static CloseableHttpClient client;
 
     public static void main(String[] args) throws Exception {
-        String uri, user, pswd;
+        String uri, user, pswd, responseBody, xsrfValue = null, formIdValue = null, imageFileName = null;
         uri = PropertyReader.getProperty("999Login");
         user = PropertyReader.getProperty("user");
         pswd = PropertyReader.getProperty("pswd");
         CloseableHttpResponse httpResponse;
-        String responseBody = null;
         HttpPost postRequest;
         Document doc;
         HttpEntity entity;
         String premoderateUrl = "https://999.md/premoderate";
-        List<NameValuePair> params;
 
         // Custom request logging interceptor
         HttpRequestInterceptor requestLogger = (request, context) -> {
@@ -111,12 +110,13 @@ public class CClient {
         // 2. Login POST Entity
         postRequest = new HttpPost(new URI(uri));
         setCommonHeaders(postRequest, uri);
-        params = new ArrayList<>();
-        params.add(new BasicNameValuePair("_xsrf", cookieStore.getCookieByName("_xsrf")));
-        params.add(new BasicNameValuePair("redirect_url", cookieStore.getCookieByName("redirect_url")));
-        params.add(new BasicNameValuePair("login", user));
-        params.add(new BasicNameValuePair("password", pswd));
-        postRequest.setEntity(new UrlEncodedFormEntity(params)); //automatically set (content-type: application/x-www-form-urlencoded)
+        List<NameValuePair> loginBody = List.of(
+                new BasicNameValuePair("_xsrf", cookieStore.getCookieByName("_xsrf")),
+                new BasicNameValuePair("redirect_url", cookieStore.getCookieByName("redirect_url")),
+                new BasicNameValuePair("login", user),
+                new BasicNameValuePair("password", pswd)
+        );
+        postRequest.setEntity(buildEntity(loginBody, false)); //automatically set (content-type: application/x-www-form-urlencoded)
         httpResponse = client.execute(postRequest);
 
         // Выводим тело
@@ -137,8 +137,8 @@ public class CClient {
 
         // Парсинг HTML с помощью JSoup
         doc = Jsoup.parse(responseBody);
-        String xsrfValue = doc.select("input[name=_xsrf]").attr("value"); // один из куков как input xsrf
-        String formIdValue = doc.select("input[name=form_id]").attr("value");
+        xsrfValue = doc.select("input[name=_xsrf]").attr("value"); // один из куков как input xsrf
+        formIdValue = doc.select("input[name=form_id]").attr("value");
 
         // Выводим тело
         System.out.println("XSRF Value: " + xsrfValue);
@@ -158,7 +158,7 @@ public class CClient {
         httpResponse = client.execute(postRequest);
         responseBody = EntityUtils.toString(httpResponse.getEntity());
         JSONObject jsonResponse = new JSONObject(responseBody);
-        String imageFileName = jsonResponse.getJSONObject("output_metadata").getString("filename");
+        imageFileName = jsonResponse.getJSONObject("output_metadata").getString("filename");
 
         // Выводим тело
         System.out.println("Image name: " + imageFileName);
@@ -166,85 +166,36 @@ public class CClient {
         //EntityUtils.consume(postImageResponse.getEntity());
         httpResponse.close();
 
-        // premoderate
-        postRequest = new HttpPost(new URI(premoderateUrl));
-        setCommonHeaders(postRequest, pageAd);
-        entity = MultipartEntityBuilder.create()
-                .addTextBody("_xsrf", xsrfValue, ContentType.TEXT_PLAIN )
-                .addTextBody("form_id", formIdValue, ContentType.TEXT_PLAIN )
-                .addTextBody("category_url", "construction-and-repair", ContentType.TEXT_PLAIN )
-                .addTextBody("subcategory_url", "construction-and-repair/finishing-and-facing-materials", ContentType.TEXT_PLAIN )
-                .addTextBody("offer_type", "776", ContentType.TEXT_PLAIN )
-                .addTextBody("12", "плитка размер 15*15 белая turkey", ContentType.TEXT_PLAIN.withCharset("UTF-8") )
-                .addTextBody("13", "Настенная плитка кафель 15*15 цвет белая турция. 200 л/м2. Минимальный заказ 2 метра", ContentType.TEXT_PLAIN.withCharset("UTF-8") )
-                .addTextBody("1404", "", ContentType.TEXT_PLAIN )
-                .addTextBody("7", "12900", ContentType.TEXT_PLAIN )
-                .addTextBody("2", "200", ContentType.TEXT_PLAIN )
-                .addTextBody("2_unit", "mdl", ContentType.TEXT_PLAIN )
-                .addTextBody("1640", "", ContentType.TEXT_PLAIN )
-                .addTextBody("686", "21099", ContentType.TEXT_PLAIN )
-                .addTextBody("5", "12869", ContentType.TEXT_PLAIN )
-                .addTextBody("14", imageFileName, ContentType.TEXT_PLAIN )
-                .addTextBody("video", "", ContentType.TEXT_PLAIN )
-                .addTextBody("16", "37379169100", ContentType.TEXT_PLAIN )
-                .addTextBody("16", "37379544975", ContentType.TEXT_PLAIN )
-                .addTextBody("country_prefix", "373", ContentType.TEXT_PLAIN )
-                .addTextBody("number", "", ContentType.TEXT_PLAIN )
-                .addTextBody("package_name", "basic", ContentType.TEXT_PLAIN )
-                .build();
-        postRequest.setEntity(entity);
-        httpResponse = client.execute(postRequest);
+        // Create Params
+        List<NameValuePair> params = createParams(xsrfValue, formIdValue, imageFileName);
+        List<NameValuePair> paramsWithoutAgree = new ArrayList<>(params);
+        paramsWithoutAgree.removeIf(param -> param.getName().equals("agree"));
 
-        // Выводим тело
-        responseBody = EntityUtils.toString(httpResponse.getEntity());
-        System.out.printf("premoderate Response Body: %s", responseBody);
-        httpResponse.close();
+        // premoderate
+        /*postRequest = new HttpPost(new URI(premoderateUrl));
+        setCommonHeaders(postRequest, pageAd);
+        postRequest.setEntity(buildEntity(paramsWithoutAgree, true));
+        httpResponse = client.execute(postRequest);
+        EntityUtils.consume(httpResponse.getEntity());
+        httpResponse.close();*/
 
         // 5. Agree checkbox
         String agreeUrl = "https://999.md/ad_price?subcategory=1238&ad_id=&has_delivery=&package_name=basic&phone=37379169100";
         httpResponse = httpGet(agreeUrl, pageAd);
         httpResponse.close();
 
-        params = List.of(
-                new BasicNameValuePair("_xsrf", xsrfValue),
-                new BasicNameValuePair("form_id", formIdValue),
-                new BasicNameValuePair("category_url", "construction-and-repair"),
-                new BasicNameValuePair("subcategory_url", "construction-and-repair/finishing-and-facing-materials"),
-                new BasicNameValuePair("offer_type", "776"),
-                new BasicNameValuePair("12", "плитка размер 15*15 белая turkey"),
-                new BasicNameValuePair("13", "Настенная плитка кафель 15*15 цвет белая турция. 200 л/м2. Минимальный заказ 2 метра"),
-                new BasicNameValuePair("1404", ""),
-                new BasicNameValuePair("7", "12900"),
-                new BasicNameValuePair("2", "200"),
-                new BasicNameValuePair("2_unit", "mdl"),
-                new BasicNameValuePair("1640", ""),
-                new BasicNameValuePair("686", "21099"),
-                new BasicNameValuePair("5", "12869"),
-                new BasicNameValuePair("14", imageFileName),
-                new BasicNameValuePair("file", ""),
-                new BasicNameValuePair("video", ""),
-                new BasicNameValuePair("16", "37379169100"),
-                new BasicNameValuePair("country_prefix", "373"),
-                new BasicNameValuePair("number", ""),
-                new BasicNameValuePair("package_name", "basic"),
-                new BasicNameValuePair("agree", "1")
-        );
-
         // premoderate
         postRequest = new HttpPost(new URI(premoderateUrl));
         setCommonHeaders(postRequest, pageAd);
-        postRequest.setEntity(buildMultipartEntity(params));
+        postRequest.setEntity(buildEntity(params, true));
         httpResponse = client.execute(postRequest);
-
-        // Выводим тело
-        responseBody = EntityUtils.toString(httpResponse.getEntity());
-        System.out.printf("premoderate Response Body: %s", responseBody);
+        EntityUtils.consume(httpResponse.getEntity());
         httpResponse.close();
 
         // 6. Send Ad Form
         postRequest = new HttpPost(new URI(pageAd));
         setCommonHeaders(postRequest, pageAd);
-        postRequest.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+        postRequest.setEntity(buildEntity(params, false));
         httpResponse = client.execute(postRequest);
 
         // Выводим тело
@@ -270,11 +221,41 @@ public class CClient {
         request.setHeader("referer", referer);
         request.setHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36");
     }
-    private static HttpEntity buildMultipartEntity(List<NameValuePair> params) {
-        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-        for (NameValuePair param : params) {
-            builder.addTextBody(param.getName(), param.getValue(), ContentType.TEXT_PLAIN.withCharset("UTF-8"));
+    private static HttpEntity buildEntity(List<NameValuePair> params, boolean isMultipart) throws UnsupportedEncodingException {
+        if (isMultipart) {
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+            for (NameValuePair param : params) {
+                builder.addTextBody(param.getName(), param.getValue(), ContentType.TEXT_PLAIN.withCharset("UTF-8"));
+            }
+            return builder.build();
+        } else {
+            return new UrlEncodedFormEntity(params, "UTF-8");
         }
-        return builder.build();
+    }
+    private static List<NameValuePair> createParams(String xsrfValue, String formIdValue, String imageFileName) {
+        return List.of(
+                new BasicNameValuePair("_xsrf", xsrfValue),
+                new BasicNameValuePair("form_id", formIdValue),
+                new BasicNameValuePair("category_url", "construction-and-repair"),
+                new BasicNameValuePair("subcategory_url", "construction-and-repair/finishing-and-facing-materials"),
+                new BasicNameValuePair("offer_type", "776"),
+                new BasicNameValuePair("12", "плитка размер 15*15 белая turkey"),
+                new BasicNameValuePair("13", "Настенная плитка кафель 15*15 цвет белая турция. 200 л/м2. Минимальный заказ 2 метра"),
+                new BasicNameValuePair("1404", ""),
+                new BasicNameValuePair("7", "12900"),
+                new BasicNameValuePair("2", "200"),
+                new BasicNameValuePair("2_unit", "mdl"),
+                new BasicNameValuePair("1640", ""),
+                new BasicNameValuePair("686", "21099"),
+                new BasicNameValuePair("5", "12869"),
+                new BasicNameValuePair("14", imageFileName),
+                new BasicNameValuePair("file", ""),
+                new BasicNameValuePair("video", ""),
+                new BasicNameValuePair("16", "37379169100"),
+                new BasicNameValuePair("country_prefix", "373"),
+                new BasicNameValuePair("number", ""),
+                new BasicNameValuePair("package_name", "basic"),
+                new BasicNameValuePair("agree", "1")
+        );
     }
 }
