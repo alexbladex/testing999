@@ -163,7 +163,6 @@ public class CClient {
         // Выводим тело
         System.out.println("Image name: " + imageFileName);
         System.out.printf("Image Response Body: %s", responseBody);
-        //EntityUtils.consume(postImageResponse.getEntity());
         httpResponse.close();
 
         // Create Params
