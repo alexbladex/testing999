@@ -208,7 +208,6 @@ public class CClient {
     private static CloseableHttpResponse httpGet(String url, String referer) throws URISyntaxException, IOException {
         HttpGet getRequest = new HttpGet(new URI(url));
         setCommonHeaders(getRequest, referer);
-
         return client.execute(getRequest);
     }
     private static void setCommonHeaders(HttpRequestBase request, String referer) {
