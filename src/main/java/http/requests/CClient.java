@@ -103,7 +103,7 @@ public class CClient {
                 })
                 .build();
 
-        // 1. Login запрос
+        // 1. Open Login page
         httpResponse = httpGet(uri, uri);
         httpResponse.close();
 
