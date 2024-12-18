@@ -150,7 +150,7 @@ public class CClient {
         String uploadUrl = "https://i.simpalsmedia.com/upload//?template=f2a36d5fa9db98cd70d83a1dee629306b1b683153cfcca3c6a7ed1004afd4bf0eDviK8XVZ3RiU95wJ9OLdQLWiRP5ZG1ldBn9Yc2wcvVxvlE5U6qYqEzn3WU6bQhx8R%2FCv046tzYZpIi9KNw0keOpppQr4%2F%2FAZR6NADhwfDeeEy8%2BUyXZkVP11yaDiflf2VdrvFIlC3jmt4LzTMENEj%2F0DzKA60gZq5BDqT%2FsvBk%3DgOXiQQLBUCeKJY279OJVZOI33S8jxjfmlNhzOwXt38nkGhjyWheoIAEzyLDa%2BGh4ilDxmzYp9X1Ckt8UoSEdsxX7quT84O%2ByKeKCgmBotyftkJfNAEMHLAkg7tMYW7Hvif5GZgxfl2E2zMhw6xrSDf62xzOipWGTNb5ah8HIpXI%3DUmuAAux21jkmCTB%2B9ykJQIZ%2F90Sb2nuJ6vh8e6aDTXsoNyNUBg9fZ%2ByfWfxZ1hJniR31ZNh32gEzJlyvoZ1hArRE5Vye5%2FJeROFcdC04aIlVyWud2%2FHV5ffPVIkdydL3%2BgYqllgE7ICZfv%2By88Tjz43W%2F%2Fb%2FnB0KfubkV%2BuAC3o%3DEJUJ2gnkrdt4Wxd1J09OveTEZB%2Fk7eKRJN6SuEIJpw8JVlNMp9B%2Br1ObSe6H%2F7EzPwvs%2FqHx%2B82zH8U2p580CtgJBO%2ByfPFxaV2F%2Fgfvu1WwGGSacQ%2FT7KVgOcd806NYNTdJb1pHnUUZAxrdxw5KfSg03LDxSP11LiPk2pB1Xug%3D&base64=thumb";
         postRequest = new HttpPost(new URI(uploadUrl));
         setCommonHeaders(postRequest, page999);
-        FileBody fileBody = new FileBody(new File("/C:/Temp/plitka.jpg"));
+        FileBody fileBody = new FileBody(new File("C:/Temp/plitka.jpg"));
         entity = MultipartEntityBuilder.create()
                 .addPart("file", fileBody)
                 .build();
