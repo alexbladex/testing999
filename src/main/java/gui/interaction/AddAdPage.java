@@ -26,8 +26,8 @@ public class AddAdPage extends LoggedInPage {
     By error_hint_h = By.xpath("//*[contains(@id, 'error') or contains(@class, 'error')]");
     By payment_h = By.xpath("//form[@id='js-product-payment']/h1");
     By payment_id = By.xpath("//link[@rel='alternate']"); ////meta[@property='og:url']
-    By success_h = By.xpath("//h2/*[contains(@class, 'success')]");
-    By success_id = By.xpath("//p/a[contains(@href, 'success')]");
+    By success_h = By.xpath("//div[contains(@class, 'success')]/h2/i[contains(@class, 'success')]");
+    By success_id = By.xpath("//div[contains(@class, 'success')]/p/a[contains(@href, 'success')]");
 
     public AdItem addDefaultAd() {
         AdTemplate temp = new AdTemplate();
