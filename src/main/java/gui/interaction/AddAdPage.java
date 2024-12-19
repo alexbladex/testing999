@@ -29,6 +29,11 @@ public class AddAdPage extends LoggedInPage {
     By success_h = By.xpath("//h2/*[contains(@class, 'success')]");
     By success_id = By.xpath("//p/a[contains(@href, 'success')]");
 
+    public AdItem addDefaultAd() {
+        AdTemplate temp = new AdTemplate();
+        JSONObject jsonObject = temp.getAd();
+        return submittingForm(jsonObject);
+    }
     public AddAdPage(WebDriver driver) {
         super(driver);  // Call MainPage constructor
         wait.until(ExpectedConditions.visibilityOfElementLocated(add_ad));
@@ -181,6 +186,7 @@ public class AddAdPage extends LoggedInPage {
             return new AdItem(-1, title, null, "Warning content");
         }
         return new AdItem(null, null, null, null);
+    }
 //        try {
 //            Thread.sleep(30000);
 //        } catch (InterruptedException e) {
@@ -189,13 +195,6 @@ public class AddAdPage extends LoggedInPage {
 //        if (true) {
 //            throw new RuntimeException("Stopping execution");
 //        }
-
-//            if (errorSection.isDisplayed()) {
-//                errorSection.findElements(By.tagName("li")).forEach(li -> System.out.println(li.getText()));
-//            } else {
-//                System.out.println("FALSE !!!");
-//            }
-    }
     private Integer getItemIdBy(By element) {
         return Integer.parseInt(driver.findElement(element)
                 .getAttribute("href")

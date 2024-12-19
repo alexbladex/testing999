@@ -62,7 +62,7 @@ public class TestAddDeleteItems {
     @Test(enabled = true, groups = "requiresLogin", retryAnalyzer = RetryAnalyzer.class)
     public void testAddAdData() {
         // it is assumed that the marketplace places only one ad, all the others will be in an inactive status
-        DelAdPage itempage = new DelAdPage(driver);
+        AddAdPage itempage = new AddAdPage(driver);
         int inactive = 0;
         for (int i = 0; i < 10; i++) {
             AdItem ad = itempage.addDefaultAd();

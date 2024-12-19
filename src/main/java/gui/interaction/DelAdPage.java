@@ -7,7 +7,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.util.List;
 
-public class DelAdPage extends LoggedInPage {
+public class DelAdPage extends AddAdPage {
     String summaryTemplate = "//a[contains(text(), '%s')]";
     String itemTemplate = "//input[@value='%s']";
     By page_qty = By.xpath("//nav[@class='paginator cf']/ul/li/a");
@@ -165,12 +165,6 @@ public class DelAdPage extends LoggedInPage {
                 .replaceAll("^.*?md.*?(\\d+).*$", "$1"));
         System.out.println("getIdByTitle return: " + i);
         return i;
-    }
-    public AdItem addDefaultAd() {
-        AdTemplate temp = new AdTemplate();
-        JSONObject jsonObject = temp.getAd();
-        AddAdPage itempage = new AddAdPage(driver);
-        return itempage.submittingForm(jsonObject);
     }
     public void selectDropdown(WebElement dropdown, String value) {
         initializeSelect(dropdown);
