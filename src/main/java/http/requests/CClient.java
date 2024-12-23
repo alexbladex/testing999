@@ -19,9 +19,7 @@ import org.jsoup.nodes.Document;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -33,7 +31,7 @@ public class CClient {
     private static CloseableHttpClient client;
 
     public static void main(String[] args) throws Exception {
-        String uri, user, pswd, responseBody, xsrfValue = null, formIdValue = null, imageFileName = null;
+        String uri, user, pswd, responseBody, xsrfValue, formIdValue, imageFileName;
         uri = PropertyReader.getProperty("999Login");
         user = PropertyReader.getProperty("user");
         pswd = PropertyReader.getProperty("pswd");
@@ -41,7 +39,6 @@ public class CClient {
         HttpPost postRequest;
         Document doc;
         HttpEntity entity;
-        String premoderateUrl = "https://999.md/premoderate";
 
         // Custom request logging interceptor
         HttpRequestInterceptor requestLogger = (request, context) -> {
@@ -104,32 +101,21 @@ public class CClient {
                 .build();
 
         // 1. Open Login page
-        httpResponse = httpGet(uri, uri);
-        httpResponse.close();
+        httpGet(uri, uri);
 
         // 2. Login POST Entity
-        postRequest = new HttpPost(new URI(uri));
-        setCommonHeaders(postRequest, uri);
         List<NameValuePair> loginBody = List.of(
                 new BasicNameValuePair("_xsrf", cookieStore.getCookieByName("_xsrf")),
                 new BasicNameValuePair("redirect_url", cookieStore.getCookieByName("redirect_url")),
                 new BasicNameValuePair("login", user),
                 new BasicNameValuePair("password", pswd)
         );
-        postRequest.setEntity(buildEntity(loginBody, false)); //automatically set (content-type: application/x-www-form-urlencoded)
-        httpResponse = client.execute(postRequest);
-
-        // Выводим тело
-        responseBody = EntityUtils.toString(httpResponse.getEntity());
-        System.out.printf("999 Response Body: %s", responseBody);
-        httpResponse.close();
-
+        httpPost(uri, uri, loginBody, false);
 
         // 3. Open Ad Pages
         String pageAd = "https://999.md/add?category=construction-and-repair&subcategory=construction-and-repair/finishing-and-facing-materials";
         String page999 = "https://999.md";
-        httpResponse = httpGet(pageAd, page999);
-        responseBody = EntityUtils.toString(httpResponse.getEntity());
+        responseBody = httpGet(pageAd, page999);
 
         /*for (Cookie cookie : cookieStore.getCookies()) {
             System.out.println(cookie.getName() + ": " + cookie.getValue() + ", " + cookie.getDomain());
@@ -144,7 +130,6 @@ public class CClient {
         System.out.println("XSRF Value: " + xsrfValue);
         System.out.println("Form ID Value: " + formIdValue);
         System.out.printf("Form Response Body: %s", responseBody);
-        httpResponse.close();
 
         // 4. Upload image
         String uploadUrl = "https://i.simpalsmedia.com/upload//?template=f2a36d5fa9db98cd70d83a1dee629306b1b683153cfcca3c6a7ed1004afd4bf0eDviK8XVZ3RiU95wJ9OLdQLWiRP5ZG1ldBn9Yc2wcvVxvlE5U6qYqEzn3WU6bQhx8R%2FCv046tzYZpIi9KNw0keOpppQr4%2F%2FAZR6NADhwfDeeEy8%2BUyXZkVP11yaDiflf2VdrvFIlC3jmt4LzTMENEj%2F0DzKA60gZq5BDqT%2FsvBk%3DgOXiQQLBUCeKJY279OJVZOI33S8jxjfmlNhzOwXt38nkGhjyWheoIAEzyLDa%2BGh4ilDxmzYp9X1Ckt8UoSEdsxX7quT84O%2ByKeKCgmBotyftkJfNAEMHLAkg7tMYW7Hvif5GZgxfl2E2zMhw6xrSDf62xzOipWGTNb5ah8HIpXI%3DUmuAAux21jkmCTB%2B9ykJQIZ%2F90Sb2nuJ6vh8e6aDTXsoNyNUBg9fZ%2ByfWfxZ1hJniR31ZNh32gEzJlyvoZ1hArRE5Vye5%2FJeROFcdC04aIlVyWud2%2FHV5ffPVIkdydL3%2BgYqllgE7ICZfv%2By88Tjz43W%2F%2Fb%2FnB0KfubkV%2BuAC3o%3DEJUJ2gnkrdt4Wxd1J09OveTEZB%2Fk7eKRJN6SuEIJpw8JVlNMp9B%2Br1ObSe6H%2F7EzPwvs%2FqHx%2B82zH8U2p580CtgJBO%2ByfPFxaV2F%2Fgfvu1WwGGSacQ%2FT7KVgOcd806NYNTdJb1pHnUUZAxrdxw5KfSg03LDxSP11LiPk2pB1Xug%3D&base64=thumb";
@@ -180,40 +165,46 @@ public class CClient {
 
         // 5. Agree checkbox
         String agreeUrl = "https://999.md/ad_price?subcategory=1238&ad_id=&has_delivery=&package_name=basic&phone=37379169100";
-        httpResponse = httpGet(agreeUrl, pageAd);
-        httpResponse.close();
+        httpGet(agreeUrl, pageAd);
 
         // premoderate
-        postRequest = new HttpPost(new URI(premoderateUrl));
-        setCommonHeaders(postRequest, pageAd);
-        postRequest.setEntity(buildEntity(params, true));
-        httpResponse = client.execute(postRequest);
-        EntityUtils.consume(httpResponse.getEntity());
-        httpResponse.close();
+        String premoderateUrl = "https://999.md/premoderate";
+        httpPost(premoderateUrl, pageAd, params, true);
+
 
         // 6. Send Ad Form
-        postRequest = new HttpPost(new URI(pageAd));
-        setCommonHeaders(postRequest, pageAd);
-        postRequest.setEntity(buildEntity(params, false));
-        httpResponse = client.execute(postRequest);
-
-        // Выводим тело
-        responseBody = EntityUtils.toString(httpResponse.getEntity());
-        System.out.printf("Response Body: %s", responseBody);
-        httpResponse.close();
+        httpPost(pageAd, pageAd, params, false);
 
         /////////////////////////
         client.close();
     }
-    private static CloseableHttpResponse httpGet(String url, String referer) throws URISyntaxException, IOException {
+    private static String httpGet(String url, String referer) throws URISyntaxException, IOException {
         HttpGet getRequest = new HttpGet(new URI(url));
         setCommonHeaders(getRequest, referer);
-        return client.execute(getRequest);
+        try (CloseableHttpResponse httpResponse = client.execute(getRequest)) {
+            return EntityUtils.toString(httpResponse.getEntity());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+    private static String httpPost(String url, String referer, List<NameValuePair> params, boolean isMultipart) throws URISyntaxException, IOException {
+        HttpPost postRequest = new HttpPost(new URI(url));
+        setCommonHeaders(postRequest, referer);
+        postRequest.setEntity(buildEntity(params, isMultipart)); //automatically set (content-type: application/x-www-form-urlencoded)
+        try (CloseableHttpResponse httpResponse = client.execute(postRequest)) {
+            String responseBody = EntityUtils.toString(httpResponse.getEntity());
+            System.out.printf("Response Body: %s%n", responseBody);
+            return responseBody;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
     private static void setCommonHeaders(HttpRequestBase request, String referer) {
-        request.setHeader("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
-        request.setHeader("accept-language", "en-US,en;q=0.9");
-        request.setHeader("accept-encoding", "gzip, deflate, br");
+        request.setHeader("accept", "*/*");
+        request.setHeader("accept-language", "en-US,en;q=0.5");
+        request.setHeader("accept-encoding", "gzip, deflate");
         request.setHeader("cache-control", "no-cache");
         request.setHeader("connection", "keep-alive");
         request.setHeader("referer", referer);
