@@ -173,7 +173,22 @@ public class CClient {
 
 
         // 6. Send Ad Form
-        httpPost(pageAd, pageAd, params, false);
+        responseBody = httpPost(pageAd, pageAd, params, false);
+        doc = Jsoup.parse(responseBody);
+        if (!doc.select("div[class*='success'] > h2 > i[class*='success']").isEmpty()) {
+            String hrefValue = doc.select("link[rel='alternate']").attr("href");
+            String itemId = hrefValue.replaceAll("/(\\d+)/", "$1"); //^.*?md.*?(\d+).*$
+            System.out.println("Success ID: " + itemId);
+        }
+        if (!doc.select("section[class*='error']").isEmpty()) {
+            String hrefValue = doc.select("section[class*='error'] > ul > li").text();
+            System.out.println("Error ID: " + hrefValue);
+        }
+        if (!doc.select("form#js-product-payment > h1").isEmpty()) {
+            String hrefValue = doc.select("link[rel='alternate']").attr("href");
+            String itemId = hrefValue.replaceAll("/(\\d+)/", "$1");
+            System.out.println("Payment required ID: " + itemId);
+        }
 
         /////////////////////////
         client.close();
@@ -198,7 +213,7 @@ public class CClient {
             return responseBody;
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
+            return "";
         }
     }
     private static void setCommonHeaders(HttpRequestBase request, String referer) {
