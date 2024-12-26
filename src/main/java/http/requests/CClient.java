@@ -117,10 +117,6 @@ public class CClient {
         String page999 = "https://999.md";
         responseBody = httpGet(pageAd, page999);
 
-        /*for (Cookie cookie : cookieStore.getCookies()) {
-            System.out.println(cookie.getName() + ": " + cookie.getValue() + ", " + cookie.getDomain());
-        }*/
-
         // Парсинг HTML с помощью JSoup
         doc = Jsoup.parse(responseBody);
         xsrfValue = doc.select("input[name=_xsrf]").attr("value"); // один из куков как input xsrf
