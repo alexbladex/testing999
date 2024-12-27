@@ -26,6 +26,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CClient {
     private static CloseableHttpClient client;
@@ -249,5 +250,29 @@ public class CClient {
                 new BasicNameValuePair("package_name", "basic"),
                 new BasicNameValuePair("agree", "1")
         );
+    }
+}
+class CookieStorage extends BasicCookieStore {
+
+    public String getCookieByName(String cookieName) {
+        return this.getCookies().stream()
+                .filter(cookie -> cookie.getName().equals(cookieName))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public String getCookieByDomainAndName(String domain, String cookieName) {
+        return this.getCookies().stream()
+                .filter(cookie -> cookie.getDomain().equals(domain) && cookie.getName().equals(cookieName))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public List<Cookie> getCookiesByDomain(String domain) {
+        return this.getCookies().stream()
+                .filter(cookie -> cookie.getDomain().equals(domain))
+                .collect(Collectors.toList());
     }
 }
