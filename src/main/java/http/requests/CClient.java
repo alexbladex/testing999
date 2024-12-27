@@ -35,8 +35,6 @@ public class CClient {
         uri = PropertyReader.getProperty("999Login");
         user = PropertyReader.getProperty("user");
         pswd = PropertyReader.getProperty("pswd");
-        CloseableHttpResponse httpResponse;
-        HttpPost postRequest;
         Document doc;
 
         // Custom request logging interceptor
