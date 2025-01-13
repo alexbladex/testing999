@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 
 public class HtmlUnitExample {
     public static void main(String[] args) {
-        String uri, user, pswd, responseBody, xsrfValue, formIdValue, imageFileName;
+        String uri, user, pswd, responseBody, imageFileName;
         uri = PropertyReader.getProperty("999Login");
         user = PropertyReader.getProperty("user");
         pswd = PropertyReader.getProperty("pswd");
