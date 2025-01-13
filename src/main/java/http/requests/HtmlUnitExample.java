@@ -113,6 +113,16 @@ public class HtmlUnitExample {
             e.printStackTrace();
         }
 
+        // 3. Open Main page
+        try {
+            HtmlPage page = client.getPage(uri);
+            // Извлечение значений с помощью XPath
+            HtmlInput xsrfInput = (HtmlInput) page.getFirstByXPath("//input[@name='_xsrf']");
+            HtmlInput formIdInput = (HtmlInput) page.getFirstByXPath("//input[@name='form_id']");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         // Закрываем клиент
         client.close();
     }
