@@ -59,8 +59,8 @@ public class TestBasePage {
         //mainpage.takeScreenshot();
         logger.info("Current language: {}", activeLang);
 
-        if (activeLang.equals("ro")) mainpage.changeLang("ru");
-        else mainpage.changeLang("ro");
+        if (activeLang.equals("ro")) mainpage.changeLang(LangCode.RU);
+        else mainpage.changeLang(LangCode.RO);
 
         String newLang = mainpage.currentLang();
         logger.info("Language after change: {}", newLang);

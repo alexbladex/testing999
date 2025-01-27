@@ -177,3 +177,8 @@ public class DelAdPage extends AddAdPage {
         this.anchor = anchor;
     }
 }
+enum DataAdItemState {
+    DISABLED,
+    ACTIVE,
+    ALL
+}

@@ -12,7 +12,7 @@ public class _addAllItems {
         System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
         WebDriver driver = DriverFactory.init(uri);
         MainPage mainpage = new MainPage(driver);
-        mainpage.changeLang("ru");
+        mainpage.changeLang(LangCode.RU);
         LoginPage loginpage = new LoginPage(driver);
         loginpage.performLogin(user,pswd);
         AddAdPage itempage = new AddAdPage(driver);

@@ -73,22 +73,19 @@ public class BasePage {
         driver.switchTo().defaultContent();
         return lang;
     }
-    public void changeLang(String newLang) {
+    public void changeLang(LangCode newLang) {
         wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(frame));
+        WebElement button;
         String lang = driver.findElement(activeLang).getAttribute("data-lang");
-        if (newLang.equals("ro") && lang.equals("ru")) {
-            if (Config.debug) System.out.println("Current: RU");
+        if (!newLang.getCode().equals(lang)) {
             mouseOver(buttonLang);
-            WebElement button = driver.findElement(buttonRo);
-            wait.until(ExpectedConditions.visibilityOf(button));
-            lang = button.getText();
-            button.click();
-            wait.until(ExpectedConditions.stalenessOf(button));
-        }
-        if (newLang.equals("ru") && lang.equals("ro")) {
-            if (Config.debug) System.out.println("Current: RO");
-            mouseOver(buttonLang);
-            WebElement button = driver.findElement(buttonRu);
+            if (newLang == LangCode.RO) {
+                if (Config.debug) System.out.println("Current: RU");
+                button = driver.findElement(buttonRo);
+            } else {
+                if (Config.debug) System.out.println("Current: RO");
+                button = driver.findElement(buttonRu);
+            }
             wait.until(ExpectedConditions.visibilityOf(button));
             lang = button.getText();
             button.click();
@@ -100,8 +97,7 @@ public class BasePage {
     protected boolean isElementPresent(By element) {
         try {
             Thread.sleep(100);
-            if (driver.findElement(element).isDisplayed()) return true;
-            return false;
+            return driver.findElement(element).isDisplayed();
         } catch (NoSuchElementException | StaleElementReferenceException | InterruptedException e) {
             return false;
         }
@@ -177,4 +173,11 @@ public class BasePage {
     public static BasePage getCurrentPage() {
         return currentPage;
     }
+}
+enum LangCode {
+    RU("ru"),
+    RO("ro");
+    private final String code;
+    LangCode(String code) { this.code = code; }
+    public String getCode() { return code; }
 }

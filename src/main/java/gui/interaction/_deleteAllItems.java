@@ -19,7 +19,7 @@ public class _deleteAllItems {
             driver.manage().deleteCookieNamed("simpalsid.auth");
         }
         MainPage mainpage = new MainPage(driver);
-        mainpage.changeLang("ru");
+        mainpage.changeLang(LangCode.RU);
         LoginPage loginpage = new LoginPage(driver);
         loginpage.performLogin(user,pswd);
         DelAdPage itempage = new DelAdPage(driver);
