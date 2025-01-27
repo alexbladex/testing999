@@ -32,9 +32,8 @@ public class HtmlUnitExample {
         consoleHandler.setLevel(Level.SEVERE); // Устанавливаем уровень выводимых сообщений
         logger.addHandler(consoleHandler);
 
+        // Настройка клиента (WebClient синхронный клиент)
         WebClient client = new WebClient(BrowserVersion.BEST_SUPPORTED);
-
-        // Настройка клиента
         client.getOptions().setRedirectEnabled(true);
         client.getOptions().setThrowExceptionOnScriptError(false);
         client.getOptions().setThrowExceptionOnFailingStatusCode(false);
