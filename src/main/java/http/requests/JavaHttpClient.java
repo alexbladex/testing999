@@ -29,8 +29,20 @@ import java.net.URI;
 
 public class JavaHttpClient {
 
-    private static HttpClient client;
-    private static CookieManager cookieManager;
+    private static final HttpClient client;
+    private static final CookieManager cookieManager;
+
+    static {
+        cookieManager = new CookieManager();
+        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+
+        client = HttpClient.newBuilder()
+                .followRedirects(HttpClient.Redirect.NEVER)
+                .cookieHandler(cookieManager)
+                .connectTimeout(Duration.ofSeconds(20))
+                .version(Version.HTTP_1_1)
+                .build();
+    }
 
     public static void main(String[] args) throws Exception {
         String uri, user, pswd, decompressedBody, xsrfValue, formIdValue, imageFileName;
@@ -41,18 +53,6 @@ public class JavaHttpClient {
         Map<String, String> cookies;
         Map<String, String> params;
         Document doc;
-
-        // Настройка CookieManager для автоматической обработки куков
-        cookieManager = new CookieManager();
-        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-
-        // Создание HttpClient с поддержкой редиректов и куков
-        client = HttpClient.newBuilder()
-                .followRedirects(HttpClient.Redirect.NEVER)
-                .cookieHandler(cookieManager)
-                .connectTimeout(Duration.ofSeconds(20))
-                .version(Version.HTTP_1_1)
-                .build();
 
         // 1. Open Login page
         httpResponse = httpGet(uri, uri);
