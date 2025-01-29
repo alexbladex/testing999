@@ -10,6 +10,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import gui.interaction.PropertyReader;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +21,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class HtmlUnitExample {
-    public static void main(String[] args) {
-        String uri, user, pswd, responseBody, imageFileName;
+    public static void main(String[] args) throws MalformedURLException {
+        String uri, pageAd, user, pswd, responseBody, imageFileName;
         uri = PropertyReader.getProperty("999Login");
+        pageAd = PropertyReader.getProperty("pageAd");
         user = PropertyReader.getProperty("user");
         pswd = PropertyReader.getProperty("pswd");
 
@@ -38,6 +40,7 @@ public class HtmlUnitExample {
         client.getOptions().setThrowExceptionOnScriptError(false);
         client.getOptions().setThrowExceptionOnFailingStatusCode(false);
         client.setJavaScriptErrorListener(new SilentJavaScriptErrorListener());
+        WebClientHelper clientHelper = new WebClientHelper(client);
 
         // Установка куков
         CookieManager cookieManager = client.getCookieManager();
@@ -87,40 +90,30 @@ public class HtmlUnitExample {
         });
 
         // 1. Open Login page
-        try {
-            HtmlPage page = client.getPage(uri);
-            System.out.println("Login Page is opened: " + page.getTitleText());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        clientHelper.getPage(uri, page -> System.out.println("Login Page is opened: " + page.getTitleText()));
 
         // 2. Login POST Entity
-        try {
-            WebRequest request = new WebRequest(new URL(uri), HttpMethod.POST);
-            request.setRequestParameters(List.of(
-                    new NameValuePair("_xsrf", getCookieByName(cookieManager, "_xsrf")),
-                    new NameValuePair("redirect_url", getCookieByName(cookieManager, "redirect_url")),
-                    new NameValuePair("login", user),
-                    new NameValuePair("password", pswd)
-            ));
-            request.setAdditionalHeader("Content-Type", "application/x-www-form-urlencoded");
-            setCommonHeaders(request, uri);
+        WebRequest request = new WebRequest(new URL(uri), HttpMethod.POST);
+        request.setRequestParameters(List.of(
+                new NameValuePair("_xsrf", getCookieByName(cookieManager, "_xsrf")),
+                new NameValuePair("redirect_url", getCookieByName(cookieManager, "redirect_url")),
+                new NameValuePair("login", user),
+                new NameValuePair("password", pswd)
+        ));
+        request.setAdditionalHeader("Content-Type", "application/x-www-form-urlencoded");
+        setCommonHeaders(request, uri);
 
-            HtmlPage page = client.getPage(request);
+        clientHelper.getPage(request, page -> {
             System.out.println("Final Response: " + page.getWebResponse().getContentAsString());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
 
         // 3. Open Main page
-        try {
-            HtmlPage page = client.getPage(uri);
-            // Извлечение значений с помощью XPath
+        clientHelper.getPage(pageAd, page -> {
             HtmlInput xsrfInput = (HtmlInput) page.getFirstByXPath("//input[@name='_xsrf']");
             HtmlInput formIdInput = (HtmlInput) page.getFirstByXPath("//input[@name='form_id']");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            System.out.println("xsrfInput: " + xsrfInput.getValue());
+            System.out.println("formIdInput: " + formIdInput.getValue());
+        });
 
         // Закрываем клиент
         client.close();
@@ -158,5 +151,35 @@ public class HtmlUnitExample {
             list.add(new NameValuePair(entry.getKey(), entry.getValue()));
         }
         return list;
+    }
+}
+class WebClientHelper {
+
+    private final WebClient client;
+
+    public WebClientHelper(WebClient client) {
+        this.client = client;
+    }
+
+    // Перегрузка метода для URL
+    public void getPage(String uri, PageConsumer consumer) throws MalformedURLException {
+        getPage(new WebRequest(new URL(uri)), consumer);
+    }
+
+    // Основной метод с обработчиком страницы
+    public void getPage(WebRequest request, PageConsumer consumer) {
+        try {
+            HtmlPage page = client.getPage(request);
+            if (page != null) {
+                consumer.accept(page);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FunctionalInterface
+    public interface PageConsumer {
+        void accept(HtmlPage page);
     }
 }
