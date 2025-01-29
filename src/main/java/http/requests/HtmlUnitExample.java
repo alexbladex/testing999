@@ -154,18 +154,14 @@ public class HtmlUnitExample {
     }
 }
 class WebClientHelper {
-
     private final WebClient client;
-
     public WebClientHelper(WebClient client) {
         this.client = client;
     }
-
     // Перегрузка метода для URL
     public void getPage(String uri, PageConsumer consumer) throws MalformedURLException {
         getPage(new WebRequest(new URL(uri)), consumer);
     }
-
     // Основной метод с обработчиком страницы
     public void getPage(WebRequest request, PageConsumer consumer) {
         try {
@@ -177,7 +173,6 @@ class WebClientHelper {
             e.printStackTrace();
         }
     }
-
     @FunctionalInterface
     public interface PageConsumer {
         void accept(HtmlPage page);
