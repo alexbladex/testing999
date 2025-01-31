@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.example</groupId>
-    <artifactId>Testing999md</artifactId>
+    <artifactId>testing999</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
@@ -81,6 +81,11 @@
             <artifactId>bsh</artifactId>
             <version>2.0b6</version>
         </dependency>
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-testng</artifactId>
+            <version>2.27.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -89,7 +94,7 @@
                 <!--                https://maven.apache.org/surefire/maven-surefire-plugin/examples/testng.html-->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>3.2.5</version>
                 <configuration>
                     <rerunFailingTestsCount>1</rerunFailingTestsCount>
                     <!--                    <testFailureIgnore>false</testFailureIgnore>-->
@@ -97,7 +102,17 @@
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/testing.xml</suiteXmlFile>
                     </suiteXmlFiles>
+                    <argLine>
+                        -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/1.9.22/aspectjweaver-1.9.22.jar"
+                    </argLine>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.aspectj</groupId>
+                        <artifactId>aspectjweaver</artifactId>
+                        <version>1.9.22</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <!-- Site Plugin -->
             <plugin>
@@ -105,11 +120,22 @@
                 <artifactId>maven-site-plugin</artifactId>
                 <version>3.21.0</version>
             </plugin>
+            <!-- Allure Maven Plugin -->
+            <plugin>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-maven</artifactId>
+                <version>2.12.0</version>
+            </plugin>
             <!-- Dependency Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>3.6.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
             </plugin>
         </plugins>
     </build>
