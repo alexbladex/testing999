@@ -22,7 +22,7 @@
         </filter>
     </appender>
 
-    <root level="debug">
+    <root level="ERROR">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE" />
     </root>
