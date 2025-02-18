@@ -3,6 +3,8 @@ images/
 screenshot/
 target/
 test-output/
+allure-results/
+allure-report/
 !**/src/main/**/target/
 !**/src/test/**/target/
 .mvn/
