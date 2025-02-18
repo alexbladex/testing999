@@ -24,7 +24,7 @@ public class ChromeHeadlessTest {
         ChromeOptions options = new ChromeOptions();
 //        options.setBinary("C:/path/to/chrome.exe");
         options.addArguments("--headless=new"); // Включение headless-режима
-        options.addArguments("--disable-gpu"); // Отключение GPU (рекомендуется для headless)
+//        options.addArguments("--disable-gpu"); // Отключение GPU (рекомендуется для headless)
         options.addArguments("--window-size=1920,1080"); // Установка размера окна
         options.addArguments("--remote-debugging-port=9222");
         options.addArguments("--user-data-dir=" + profilePath); // Указываем путь к папке профиля
