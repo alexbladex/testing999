@@ -8,17 +8,24 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 public class ChromeHeadlessTest {
 
     public static void main(String[] args) {
         // Указываем путь к ChromeDriver (если он не добавлен в PATH)
-        System.setProperty("webdriver.chrome.driver", "drivers64/chromedriver.exe");
+        System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
+
+        // Получаем путь к Chrome из PATH
+        String chromePath = Arrays.stream(System.getenv("PATH").split(";"))
+                .filter(path -> path.contains("Chrome"))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Chrome is missing from PATH!"));
+        chromePath += "Data/TempProfile/";
 
         // Генерируем уникальный UUID для имени папки профиля
-        String profileName = UUID.randomUUID().toString();
-        String profilePath = "d:/Program Files/ChromePortable/Data/tempProfile/" + profileName;
+        String profilePath = chromePath + UUID.randomUUID().toString();
 
         // Настройка ChromeOptions
         ChromeOptions options = new ChromeOptions();
@@ -50,20 +57,18 @@ public class ChromeHeadlessTest {
         } finally {
             // Закрываем браузер
             driver.quit();
+            Path profileDir = Paths.get(profilePath);
             try {
-                Path profileDir = Paths.get(profilePath);
-                if (Files.exists(profileDir)) {
-                    Files.walk(profileDir)
-                            .sorted((a, b) -> b.compareTo(a)) // Удаляем вложенные файлы и папки
-                            .forEach(path -> {
-                                try {
-                                    Files.delete(path);
-                                } catch (Exception e) {
-                                    System.err.println("Ошибка при удалении: " + path);
-                                }
-                            });
-                    System.out.println("Папка профиля удалена: " + profilePath);
-                }
+                Files.walk(profileDir)
+                        .sorted((a, b) -> b.compareTo(a)) // Удаляем вложенные файлы и папки
+                        .forEach(path -> {
+                            try {
+                                Files.delete(path);
+                            } catch (Exception e) {
+                                System.err.println("Ошибка при удалении: " + path); // if (Files.isDirectory(path))
+                            }
+                        });
+                System.out.println("Папка профиля удалена: " + profilePath);
             } catch (Exception e) {
                 System.err.println("Ошибка при удалении папки профиля: " + e.getMessage());
             }
