@@ -17,25 +17,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DriverFactory {
     private static final String tempProfile = createProfileDir();
-    private static final ThreadLocal<WebDriver> driver = new ThreadLocal<>();
     private static final ConcurrentHashMap<Thread, WebDriver> drivers = new ConcurrentHashMap<>();
     private static final Logger logger = LoggerFactory.getLogger(DriverFactory.class);
-    public static WebDriver getDriver(int port) throws MalformedURLException {
-        if (driver.get() == null) {
-            String hubUrl = "http://192.168.100.9:" + port + "/wd/hub";
-            ChromeOptions options = new ChromeOptions();
-//            DesiredCapabilities options = new DesiredCapabilities();
-            options.addArguments("--headless");
-            driver.set(new RemoteWebDriver(new URL(hubUrl), options));
-        }
-        return driver.get();
-    }
-
-    public static void quitDriver() {
-        if (driver.get() != null) {
-            driver.get().quit();
-            driver.remove();
-        }
+    public static synchronized WebDriver getDriver(int port) throws MalformedURLException {
+        String hubUrl = "http://192.168.100.9:" + port + "/wd/hub";
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless");
+        WebDriver driver = new RemoteWebDriver(new URL(hubUrl), options);
+        drivers.put(Thread.currentThread(), driver);
+        return driver;
     }
     public static String createProfileDir() {
         String chromePath = Arrays.stream(System.getenv("PATH").split(";"))
