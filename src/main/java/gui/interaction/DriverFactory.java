@@ -94,24 +94,26 @@ public class DriverFactory {
         }
         if (drivers.isEmpty()) {
             File path = new File(tempProfile);
-            delProfile(path);
-            logger.info("Deleting contents of directory: {}", tempProfile);
+            boolean isDeleted = delProfile(path);
+            if (isDeleted) logger.info("Deleting contents of directory: {}", tempProfile);
         }
     }
-    private static void delProfile(File directory) {
+    private static boolean delProfile(File directory) {
+        boolean allDeleted = true;
         if (directory.exists()) {
             File[] allContents = directory.listFiles();
             if (allContents != null) {
                 for (File file : allContents) {
                     if (file.isDirectory()) {
-                        delProfile(file);
-                        if (!file.delete()) logger.warn("Failed to delete directory: {}", file.getAbsolutePath());
-                    } else {
-                        //if (!file.delete()) logger.warn("Failed to delete file: {}", file.getAbsolutePath(), new Exception("Failed to delete file"));
-                        file.delete();
-                    }
+                        allDeleted &= delProfile(file);
+                        if (!file.delete()) {
+                            logger.warn("Failed to delete directory: {}", file.getAbsolutePath());
+                            allDeleted = false;
+                        }
+                    } else return file.delete();
                 }
             }
         } else logger.warn("Directory does not exist: {}", directory.getAbsolutePath());
+        return allDeleted;
     }
 }
