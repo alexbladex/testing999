@@ -70,7 +70,7 @@ public class ChromeHeadlessTest {
                         });
                 System.out.println("Папка профиля удалена: " + profilePath);
             } catch (Exception e) {
-                System.err.println("Ошибка при удалении папки профиля: " + e.getMessage());
+                System.err.println("Ошибка при удалении профиля: " + e.getMessage());
             }
         }
     }
