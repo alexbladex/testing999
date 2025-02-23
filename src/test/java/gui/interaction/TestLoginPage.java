@@ -4,17 +4,24 @@ import org.openqa.selenium.WebDriver;
 import org.testng.Assert;
 import org.testng.annotations.*;
 
+import java.net.MalformedURLException;
+
 public class TestLoginPage {
     private WebDriver driver;
     private MainPage mainpage;
     String uri, user, pswd;
 
+    @Parameters({"driverProfile", "port"})
     @BeforeClass
-    public void setupTest() {
+    public void setupTest(@Optional("local") String driverProfile, @Optional("8080") int port) throws MalformedURLException {
         uri = PropertyReader.getProperty("uri");
         user = PropertyReader.getProperty("user");
         pswd = PropertyReader.getProperty("pswd");
-        driver = DriverFactory.init();
+        if ("remote".equals(driverProfile)) {
+            driver = DriverFactory.remoteInit(port);
+        } else {
+            driver = DriverFactory.localInit();
+        }
         mainpage = new MainPage(driver, uri);
     }
     @AfterClass

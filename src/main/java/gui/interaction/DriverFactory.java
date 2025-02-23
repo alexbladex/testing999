@@ -19,7 +19,7 @@ public class DriverFactory {
     private static final String tempProfile = createProfileDir();
     private static final ConcurrentHashMap<Thread, WebDriver> drivers = new ConcurrentHashMap<>();
     private static final Logger logger = LoggerFactory.getLogger(DriverFactory.class);
-    public static synchronized WebDriver getDriver(int port) throws MalformedURLException {
+    public static synchronized WebDriver remoteInit(int port) throws MalformedURLException {
         String hubUrl = "http://192.168.100.9:" + port + "/wd/hub";
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless");
@@ -34,10 +34,10 @@ public class DriverFactory {
                 .orElseThrow(() -> new RuntimeException("Chrome is missing from PATH!"));
         return chromePath += "Data/TempProfile/";
     }
-    public static synchronized WebDriver init() {
-        return init(null);
+    public static synchronized WebDriver localInit() {
+        return localInit(null);
     }
-    public static synchronized WebDriver init(String uri) {
+    public static synchronized WebDriver localInit(String uri) {
         logger.info("Initializing WebDriver for thread: {}", Thread.currentThread().getId());
         //String id = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE).getCallerClass().getName();
         String id = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE)

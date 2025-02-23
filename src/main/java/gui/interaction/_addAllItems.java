@@ -10,7 +10,7 @@ public class _addAllItems {
         String pswd = PropertyReader.getProperty("pswd");
         JSONArray itemsArray = JSONReader.getPropertyJSONArray("items_for_webform");
         System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
-        WebDriver driver = DriverFactory.init(uri);
+        WebDriver driver = DriverFactory.localInit(uri);
         MainPage mainpage = new MainPage(driver);
         mainpage.changeLang(LangCode.RU);
         LoginPage loginpage = new LoginPage(driver);

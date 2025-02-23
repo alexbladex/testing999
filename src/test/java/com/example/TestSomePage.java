@@ -20,7 +20,7 @@ public class TestSomePage {
         uri = PropertyReader.getProperty("uri");
         user = PropertyReader.getProperty("user");
         pswd = PropertyReader.getProperty("pswd");
-        driver = DriverFactory.init();
+        driver = DriverFactory.localInit();
     }
     @Test
     public void testLogin() {

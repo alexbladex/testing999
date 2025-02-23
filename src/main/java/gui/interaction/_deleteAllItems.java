@@ -12,7 +12,7 @@ public class _deleteAllItems {
         String pswd = PropertyReader.getProperty("pswd");
         String[] itemsSummary = PropertyReader.getPropertyArray("ads_title_for_delete");
         System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
-        WebDriver driver = DriverFactory.init(uri);
+        WebDriver driver = DriverFactory.localInit(uri);
         if (Config.rmCookies) {
             driver.manage().deleteCookieNamed("auth");
             driver.manage().deleteCookieNamed("utid");

@@ -6,18 +6,25 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.*;
 
+import java.net.MalformedURLException;
+
 @Listeners(EventListener.class)
 public class TestItemsPage {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private WebDriver driver;
     String uri, user, pswd;
 
+    @Parameters({"driverProfile", "port"})
     @BeforeClass
-    public void setupTest() {
+    public void setupTest(@Optional("local") String driverProfile, @Optional("8080") int port) throws MalformedURLException {
         uri = PropertyReader.getProperty("uri");
         user = PropertyReader.getProperty("user");
         pswd = PropertyReader.getProperty("pswd");
-        driver = DriverFactory.init();
+        if ("remote".equals(driverProfile)) {
+            driver = DriverFactory.remoteInit(port);
+        } else {
+            driver = DriverFactory.localInit();
+        }
         logger.info("Test setup complete");
     }
     @AfterClass
