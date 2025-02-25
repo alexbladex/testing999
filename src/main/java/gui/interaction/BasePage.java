@@ -27,6 +27,7 @@ public class BasePage {
     By buttonRu = By.xpath("//button[@data-lang='ru']");
     By buttonRo = By.xpath("//button[@data-lang='ro']");
     By activeLang = By.xpath("//li[@class='is-active']/button");
+    By notActiveLang = By.xpath("//div[@data-sentry-component=\"ChangeLangButton\"]/div[2]/span/button");
     By categories = By.xpath("//button[@id='js-categories-toggle']");
     By add_ad = By.xpath("//a[@data-autotest='add_ad']");
     By cabinet = By.xpath("//div[@data-autotest='cabinet']");
@@ -61,17 +62,18 @@ public class BasePage {
         return b;
     }
     public boolean isLanguageDisplayed(){
-        wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(frame));
+//        wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(frame));
         boolean b = isElementPresent(buttonLang);
         if (Config.debug) System.out.println("Language button is visible: " + b);
         driver.switchTo().defaultContent();
         return b;
     }
     public String currentLang(){
-        wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(frame));
-        String lang = driver.findElement(activeLang).getAttribute("data-lang");
-        driver.switchTo().defaultContent();
-        return lang;
+//        wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(frame));
+//        String lang = driver.findElement(activeLang).getAttribute("data-lang");
+        String lang = driver.findElement(notActiveLang).getAttribute("lang");
+//        driver.switchTo().defaultContent();
+        return lang == LangCode.RO.getCode() ? LangCode.RU.getCode() : lang;
     }
     public void changeLang(LangCode newLang) {
         wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(frame));
