@@ -31,8 +31,13 @@ public class DriverFactory {
         String chromePath = Arrays.stream(System.getenv("PATH").split(";"))
                 .filter(path -> path.contains("Chrome"))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Chrome is missing from PATH!"));
-        return chromePath += "Data/TempProfile/";
+                .orElse(null);
+        if (chromePath != null) {
+            chromePath += "User Data/TempProfile/";
+        } else {
+            chromePath = "/AppData/Local/Google/Chrome/User Data/TempProfile/";
+        }
+        return chromePath;
     }
     public static synchronized WebDriver localInit() {
         return localInit(null);

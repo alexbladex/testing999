@@ -23,15 +23,15 @@ public class BasePage {
     By anchor = By.xpath("//aside//img");
     By frame = By.xpath("//iframe[@id='topbar-panel']");
     By script_topbar = By.xpath("//script [@id='topbar']");
-    By buttonLang = By.xpath("//li[@id='user-language']/button[@class='user-item-btn']");
+    By buttonLang = By.xpath("//div[@data-sentry-component='ChangeLangButton']/div[1]/div[1]");
     By buttonRu = By.xpath("//button[@data-lang='ru']");
     By buttonRo = By.xpath("//button[@data-lang='ro']");
-    By activeLang = By.xpath("//li[@class='is-active']/button");
-    By notActiveLang = By.xpath("//div[@data-sentry-component=\"ChangeLangButton\"]/div[2]/span/button");
+    By activeLang = By.xpath("/html[@data-sentry-component]");
+    By notActiveLang = By.xpath("//div[@data-sentry-component='ChangeLangButton']/div[2]/span/button");
     By categories = By.xpath("//button[@id='js-categories-toggle']");
     By add_ad = By.xpath("//a[@data-autotest='add_ad']");
     By cabinet = By.xpath("//div[@data-autotest='cabinet']");
-    By login = By.xpath("//a[@data-autotest='login']");
+    By login = By.xpath("//div[@data-sentry-component='HeaderTopSection']//button[@data-test-id='login']");
     public BasePage(WebDriver driver) {
         this.driver = driver;
         this.actions = new Actions(driver);
@@ -65,36 +65,33 @@ public class BasePage {
 //        wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(frame));
         boolean b = isElementPresent(buttonLang);
         if (Config.debug) System.out.println("Language button is visible: " + b);
-        driver.switchTo().defaultContent();
+//        driver.switchTo().defaultContent();
         return b;
     }
     public String currentLang(){
 //        wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(frame));
 //        String lang = driver.findElement(activeLang).getAttribute("data-lang");
-        String lang = driver.findElement(notActiveLang).getAttribute("lang");
 //        driver.switchTo().defaultContent();
-        return lang == LangCode.RO.getCode() ? LangCode.RU.getCode() : lang;
+//        return lang == LangCode.RO.getCode() ? LangCode.RU.getCode() : lang;
+        return driver.findElement(activeLang).getAttribute("lang");
     }
     public void changeLang(LangCode newLang) {
-        wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(frame));
-        WebElement button;
-        String lang = driver.findElement(activeLang).getAttribute("data-lang");
+//        wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(frame));
+        WebElement button = driver.findElement(buttonLang);
+        WebElement secondButton = driver.findElement(notActiveLang);
+        String lang = currentLang();
+        if (Config.debug) System.out.println("Current lang: " + lang);
         if (!newLang.getCode().equals(lang)) {
-            mouseOver(buttonLang);
-            if (newLang == LangCode.RO) {
-                if (Config.debug) System.out.println("Current: RU");
-                button = driver.findElement(buttonRo);
-            } else {
-                if (Config.debug) System.out.println("Current: RO");
-                button = driver.findElement(buttonRu);
-            }
-            wait.until(ExpectedConditions.visibilityOf(button));
-            lang = button.getText();
+//            mouseOver(buttonLang);
             button.click();
-            wait.until(ExpectedConditions.stalenessOf(button));
+            wait.until(ExpectedConditions.visibilityOf(secondButton));
+            secondButton.click();
+            wait.until(ExpectedConditions.invisibilityOf(secondButton));
+            wait.until(ExpectedConditions.attributeToBe(activeLang, "lang", newLang.getCode()));
+            lang = currentLang();
+            if (Config.debug) System.out.println("Lang is changed: " + lang);
         }
-        if (Config.debug) System.out.println("Lang is changed: " + lang);
-        driver.switchTo().defaultContent();
+//        driver.switchTo().defaultContent();
     }
     protected boolean isElementPresent(By element) {
         try {
