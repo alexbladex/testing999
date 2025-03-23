@@ -75,7 +75,7 @@ public class TestBasePage {
     }
     @Test(enabled=false, retryAnalyzer = RetryAnalyzer.class)
     public void testAllHref() {
-        if (!mainpage.isElementPresent(mainpage.getAnchor())) {
+        if (!mainpage.isElementVisible(mainpage.getAnchor())) {
             logger.error("Anchor element is not visible, failing the test.");
             Assert.fail("Anchor element is not visible, failing the test.");
         }
