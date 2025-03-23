@@ -29,8 +29,8 @@ public class BasePage {
     By activeLang = By.xpath("/html[@data-sentry-component]");
     By notActiveLang = By.xpath("//div[@data-sentry-component='ChangeLangButton']/div[2]/span/button");
     By categories = By.xpath("//button[@id='js-categories-toggle']");
-    By add_ad = By.xpath("//a[@data-autotest='add_ad']");
-    By cabinet = By.xpath("//div[@data-autotest='cabinet']");
+    By add_ad = By.xpath("//*[@id='anchor--items']/div[2]/div/div/div[3]/a");
+    By cabinet = By.xpath("//*[@id='anchor--items']/div[1]/div/div[2]/div/div/div/img");
     By login = By.xpath("//div[@data-sentry-component='HeaderTopSection']//button[@data-test-id='login']");
     public BasePage(WebDriver driver) {
         this.driver = driver;

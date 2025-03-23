@@ -4,14 +4,14 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class LoginPage extends BasePage {
-    By loginWin = By.xpath("//button[@class='login__form__footer__submit']");
-    By logContinue = By.xpath("//a[@class='login__user__buttons__redirect']");
-    By loginLogo = By.xpath("//div[@class='login__logo']");
+    By loginWin = By.xpath("//button[@type='submit']");
+    By logContinue = By.xpath("//a/button[@data-sentry-element='Button']");
+    By loginLogo = By.xpath("//*[@data-sentry-component='Header']//img[@data-sentry-element='Image']");
     By userLogwin = By.xpath("//div[@class='login__user__name']");////button[@id='user-username-btn']
     By titleLogwin = By.xpath("//div[@class='login__title']");
-    By logoutWin = By.xpath("//a[@class='login__user__buttons__logout']");
-    By user = By.xpath("//input[@name=\"login\"]");
-    By pswd = By.xpath("//input[@name=\"password\"]");
+    By logoutWin = By.xpath("//*[@data-sentry-component='Header']//button[@data-sentry-component='ExitButton']");
+    By user = By.xpath("//form/div[1]/div/input[@data-sentry-element='Input']");
+    By pswd = By.xpath("//form/div[2]/div/input[@data-sentry-element='Input']");
     public LoginPage(WebDriver driver) {
         super(driver);  // Call MainPage constructor
         wait.until(ExpectedConditions.visibilityOfElementLocated(add_ad));
@@ -28,6 +28,9 @@ public class LoginPage extends BasePage {
             if (!isElementPresent(loginLogo)) openLoginPage();
             wait.until(ExpectedConditions.visibilityOfElementLocated(loginLogo));
         } while (!loginWin(user, pswd));
+        if (isElementPresent(logContinue)) driver.findElement(logContinue).click();
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(logContinue));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(cabinet));
         if (Config.debug) System.out.println("Login completed");
         return true;
     }
