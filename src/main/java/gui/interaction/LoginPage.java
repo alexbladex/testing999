@@ -26,10 +26,8 @@ public class LoginPage extends BasePage {
         if (isElementPresent(cabinet)) {if (Config.debug) System.out.println("Already logged in"); return true;}
         do {
             if (!isElementPresent(loginLogo)) openLoginPage();
-            wait.until(ExpectedConditions.visibilityOfElementLocated(loginLogo));
         } while (!loginWin(user, pswd));
         if (isElementPresent(logContinue)) driver.findElement(logContinue).click();
-        wait.until(ExpectedConditions.invisibilityOfElementLocated(logContinue));
         wait.until(ExpectedConditions.visibilityOfElementLocated(cabinet));
         if (Config.debug) System.out.println("Login completed");
         return true;
