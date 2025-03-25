@@ -34,7 +34,6 @@ public class TestBasePage {
     @AfterClass
     public void closeTest(){
         DriverFactory.close();
-//        DriverFactory.quitDriver();
         logger.info("Test Class closed");
     }
     //@Parameters("baseURL")
