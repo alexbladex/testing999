@@ -21,13 +21,14 @@ public class AddAdPage extends LoggedInPage {
     By my_phone = By.xpath("//input[@id='phone_37379169100']");
     By other_phone = By.xpath("//input[@id='phone_37379544975']");
     By img_id = By.xpath("//section[@id='filupload-media-container']/figure/a/img");
-    By agree = By.xpath("//input[@id='agree']");
+    By agree = By.xpath("//input[@id='agreement']");
     By submit = By.xpath("//div[@class='grid_11']/button[@type='submit']");
     By error_hint_h = By.xpath("//*[contains(@id, 'error') or contains(@class, 'error')]");
     By payment_h = By.xpath("//form[@id='js-product-payment']/h1");
     By payment_id = By.xpath("//link[@rel='alternate']"); ////meta[@property='og:url']
     By success_h = By.xpath("//div[contains(@class, 'success')]/h2/i[contains(@class, 'success')]");
     By success_id = By.xpath("//div[contains(@class, 'success')]/p/a[contains(@href, 'success')]");
+    By limba_tooltip = By.xpath("//div[contains(@class, 'introjs')]//a[contains(@class, 'skipbutton')]");
 
     public AdItem addDefaultAd() {
         AdTemplate temp = new AdTemplate();
@@ -96,6 +97,9 @@ public class AddAdPage extends LoggedInPage {
         if (skip_item) return new AdItem(null, null, null, null);
         driver.get(uri);
         wait.until(ExpectedConditions.visibilityOfElementLocated(agree));
+        if (isElementPresent(limba_tooltip)) {
+            driver.findElement(limba_tooltip).click();
+        }
         System.out.println(title);
         if (offer.equals("sell")) { driver.findElement(offer_sell).click(); }
         else { driver.findElement(offer_buy).click(); }
@@ -153,7 +157,7 @@ public class AddAdPage extends LoggedInPage {
 
         agreeCheckbox.click();
         WebElement buttonSubmit = driver.findElement(submit);
-        wait.until(d -> buttonSubmit.getAttribute("disabled") == null);
+        wait.until(ExpectedConditions.attributeToBe(submit, "disabled", null));
         buttonSubmit.click();
         System.out.println("Submitted");
         wait.until(ExpectedConditions.stalenessOf(buttonSubmit));

@@ -20,7 +20,7 @@ public class BasePage {
     protected Actions actions;
     protected Select select;
     protected static BasePage currentPage;
-    By anchor = By.xpath("//aside//img");
+    By anchor = By.xpath("//*[contains(@id, 'admixer_async')]");
     By frame = By.xpath("//iframe[@id='topbar-panel']");
     By script_topbar = By.xpath("//script [@id='topbar']");
     By buttonLang = By.xpath("//div[@data-sentry-component='ChangeLangButton']/div[1]/div[1]");
@@ -53,7 +53,7 @@ public class BasePage {
     }
     public boolean isCabinetDisplayed(){
         boolean b = isElementPresent(cabinet);
-        if (Config.debug) System.out.println("Personal Cabinet is visible: " + b);
+        if (Config.debug) System.out.println("Personal Cabinet is visible for not logged in user: " + b);
         return b;
     }
     public boolean isLoginDisplayed(){
@@ -95,17 +95,9 @@ public class BasePage {
     }
     protected boolean isElementPresent(By element) {
         try {
-            Thread.sleep(100);
+            Thread.sleep(200);
             return driver.findElement(element).isDisplayed();
         } catch (NoSuchElementException | StaleElementReferenceException | InterruptedException e) {
-            return false;
-        }
-    }
-    protected boolean isElementVisible(By element) {
-        try {
-            wait.until(ExpectedConditions.visibilityOfElementLocated(element));
-            return true;
-        } catch (Exception e) {
             return false;
         }
     }
