@@ -4,14 +4,13 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class LoginPage extends BasePage {
-    By loginWin = By.xpath("//button[@type='submit']");
+    By loginWin = By.xpath("//form//button[@type='submit']");
     By logContinue = By.xpath("//a/button[@data-sentry-element='Button']");
     By loginLogo = By.xpath("//*[@data-sentry-component='Header']//img[@data-sentry-element='Image']");
-    By userLogwin = By.xpath("//div[@class='login__user__name']");////button[@id='user-username-btn']
-    By titleLogwin = By.xpath("//div[@class='login__title']");
     By logoutWin = By.xpath("//*[@data-sentry-component='Header']//button[@data-sentry-component='ExitButton']");
     By user = By.xpath("//form/div[1]/div/input[@data-sentry-element='Input']");
     By pswd = By.xpath("//form/div[2]/div/input[@data-sentry-element='Input']");
+    By p_error = By.xpath("//div[@data-sentry-component='LoginView']/p[@data-sentry-component='Caption']");
     public LoginPage(WebDriver driver) {
         super(driver);  // Call MainPage constructor
         wait.until(ExpectedConditions.visibilityOfElementLocated(add_ad));
@@ -33,6 +32,7 @@ public class LoginPage extends BasePage {
         return true;
     }
     public boolean loginWin(String username, String password) {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(loginLogo));
         if (isElementPresent(logContinue)) {
             driver.findElement(logoutWin).click();
             wait.until(ExpectedConditions.invisibilityOfElementLocated(logoutWin));
@@ -41,7 +41,9 @@ public class LoginPage extends BasePage {
         }
         driver.findElement(user).sendKeys(username);
         driver.findElement(pswd).sendKeys(password);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(loginWin));
         driver.findElement(loginWin).click();
+        if (isElementPresent(p_error)) driver.findElement(loginWin).click();
         wait.until(ExpectedConditions.invisibilityOfElementLocated(loginWin));
         return true;
     }
