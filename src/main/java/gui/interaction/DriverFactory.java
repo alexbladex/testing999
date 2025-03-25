@@ -76,7 +76,7 @@ public class DriverFactory {
 //        options.addArguments("--disable-features=OptimizationGuideModelDownloading,OptimizationHintsFetching,OptimizationTargetPrediction,OptimizationHints");
 //        options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu"); // Отключение GPU (рекомендуется для headless)
-        options.addArguments("--headless");
+//        options.addArguments("--headless");
         options.addArguments("--remote-debugging-port=9222"); //если в user-data-dir использовать родную папку профиля а не временную то non-headless режим будет работать и без debugging-port
 
         return new ChromeDriver(options);
@@ -100,12 +100,13 @@ public class DriverFactory {
             if (allContents != null) {
                 for (File file : allContents) {
                     if (file.isDirectory()) {
-                        allDeleted &= delProfile(file);
+                        delProfile(file);
                         if (!file.delete()) {
                             logger.warn("Failed to delete directory: {}", file.getAbsolutePath());
                             allDeleted = false;
                         }
-                    } else return file.delete();
+                    }
+                    else file.delete();
                 }
             }
         } else logger.warn("Directory does not exist: {}", directory.getAbsolutePath());
