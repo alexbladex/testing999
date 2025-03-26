@@ -112,8 +112,7 @@ public class BasePage {
         }
     }
     public void openLoginPage() {
-        WebElement loginButton = driver.findElement(login);
-        wait.until(ExpectedConditions.visibilityOf(loginButton));
+        WebElement loginButton = wait.until(ExpectedConditions.visibilityOfElementLocated(login));
         if (Config.debug) System.out.println("Login: " + loginButton.getText());
         loginButton.click();
         wait.until(ExpectedConditions.invisibilityOf(loginButton));
