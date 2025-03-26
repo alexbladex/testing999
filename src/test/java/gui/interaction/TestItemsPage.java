@@ -71,6 +71,7 @@ public class TestItemsPage {
     @Test
     public void tesCabinetButton() {
         MainPage mainpage = new MainPage(driver);
+        System.out.println("The user should be logged out");
         Assert.assertFalse(mainpage.isCabinetDisplayed(), "Personal Cabinet is visible for not logged in user");
     }
     @Test(enabled = false)

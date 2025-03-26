@@ -53,7 +53,7 @@ public class BasePage {
     }
     public boolean isCabinetDisplayed(){
         boolean b = isElementPresent(cabinet);
-        if (Config.debug) System.out.println("Personal Cabinet is visible for not logged in user: " + b);
+        if (Config.debug) System.out.println("Personal Cabinet is visible: " + b);
         return b;
     }
     public boolean isLoginDisplayed(){
