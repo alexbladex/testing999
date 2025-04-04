@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Date;
@@ -20,7 +21,7 @@ public class BasePage {
     protected Actions actions;
     protected Select select;
     protected static BasePage currentPage;
-    By anchor = By.xpath("//*[contains(@id, 'admixer_async')]");
+    By anchor = By.xpath("//*[@data-sentry-component='SidebarBanners']//img");
     By frame = By.xpath("//iframe[@id='topbar-panel']");
     By script_topbar = By.xpath("//script [@id='topbar']");
     By buttonLang = By.xpath("//div[@data-sentry-component='ChangeLangButton']/div[1]/div[1]");
@@ -52,18 +53,18 @@ public class BasePage {
         ((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView(true);", driver.findElement(element));
     }
     public boolean isCabinetDisplayed(){
-        boolean b = isElementPresent(cabinet);
+        boolean b = isElementVisible(cabinet);
         if (Config.debug) System.out.println("Personal Cabinet is visible: " + b);
         return b;
     }
     public boolean isLoginDisplayed(){
-        boolean b = isElementPresent(login);
+        boolean b = isElementVisible(login);
         if (Config.debug) System.out.println("Login button is visible: " + b);
         return b;
     }
     public boolean isLanguageDisplayed(){
 //        wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(frame));
-        boolean b = isElementPresent(buttonLang);
+        boolean b = isElementVisible(buttonLang);
         if (Config.debug) System.out.println("Language button is visible: " + b);
 //        driver.switchTo().defaultContent();
         return b;
@@ -101,6 +102,14 @@ public class BasePage {
             return false;
         }
     }
+    protected boolean isElementVisible(By element) {
+        try {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(element));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
     protected void initializeSelect(WebElement element) {
         this.select = new Select(element);
     }
@@ -117,17 +126,36 @@ public class BasePage {
         loginButton.click();
         wait.until(ExpectedConditions.invisibilityOf(loginButton));
     }
-    public boolean tryHttpRequest(String href) {
-        if (!href.startsWith("http")) return true;  // Skip the check for non-HTTP links
+    public boolean tryHttpRequest(String currentUrl) {
+        if (!currentUrl.startsWith("http")) return true; // Skip non-HTTP URLs
         try {
-            HttpURLConnection connection = (HttpURLConnection) new URL(href).openConnection();
-            connection.setRequestMethod("GET"); // Use HEAD to get only the response code
+            System.out.println("Starting HTTP request for URL: " + currentUrl);
+
+            HttpURLConnection connection = (HttpURLConnection) new URL(currentUrl).openConnection();
+            connection.setInstanceFollowRedirects(true);
+            connection.setRequestMethod("GET");
             connection.connect();
+
             int responseCode = connection.getResponseCode();
-//            System.out.println("URL: " + href + " Response Code: " + responseCode);
-            return responseCode == 200;
+
+            // Handle redirects
+            if (responseCode >= 300 && responseCode < 400) {
+                String location = connection.getHeaderField("Location");
+                System.out.println("Redirect detected to: " + location);
+                // Resolve relative URL
+                if (location != null && !location.startsWith("http")) {
+                    location = new URL(new URL(currentUrl), location).toString();
+                    return tryHttpRequest(location); // Retry with the new URL
+                }
+            }
+
+            boolean isSuccess = responseCode == HttpURLConnection.HTTP_OK;
+            System.out.println(isSuccess ? "SUCCESS" : "FAILURE");
+            return isSuccess;
+
         } catch (IOException e) {
-            if (Config.debug) System.out.println("URL: " + href + " encountered an exception: " + e.getMessage());
+            System.out.println("Exception encountered for URL: " + currentUrl);
+            e.printStackTrace();
             return false;
         }
     }
@@ -148,15 +176,20 @@ public class BasePage {
         String callerClass = stackTrace.getClassName();
         String callerMethod = stackTrace.getMethodName();
         callerClass = callerClass.substring(callerClass.lastIndexOf('.') + 1);
-        takeScreenshot(callerClass, callerMethod);
+        if (!takeScreenshot(callerClass, callerMethod)) System.out.println("Failed to create screenshot.");;
     }
-    protected void takeScreenshot(String callerClass, String callerMethod) {
+    protected boolean takeScreenshot(String callerClass, String callerMethod) {
         // Generate timestamp
         String timestamp = new SimpleDateFormat("_yyyyMMdd_HHmmss").format(new Date());
         // Set the file path and name using the class, method, and timestamp
         String filePath = "screenshot/" + callerClass + "_" + callerMethod + timestamp + ".png";
+        // Create screenshot directory if it doesn't exist
+        File screenshotDir = new File("screenshot");
+        if (!screenshotDir.exists()) {
+            screenshotDir.mkdir();
+        }
         // Take 'n' Save
-        ((TakesScreenshot) driver)
+        return ((TakesScreenshot) driver)
                 .getScreenshotAs(OutputType.FILE)
                 .renameTo(new File(filePath));
     }

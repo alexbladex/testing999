@@ -72,9 +72,9 @@ public class TestBasePage {
         logger.info("Language after change: {}", newLang);
         Assert.assertNotEquals(newLang, activeLang, "Language is not changed");
     }
-    @Test(enabled=false, retryAnalyzer = RetryAnalyzer.class)
+    @Test(enabled=true, retryAnalyzer = RetryAnalyzer.class)
     public void testAllHref() {
-        if (!mainpage.isElementPresent(mainpage.getAnchor())) {
+        if (!mainpage.isElementVisible(mainpage.getAnchor())) {
             logger.error("Anchor element is not visible, failing the test.");
             Assert.fail("Anchor element is not visible, failing the test.");
         }
@@ -84,6 +84,7 @@ public class TestBasePage {
         mainpage.takeScreenshot();
         for (WebElement a:tagsA){
             String href = a.getAttribute("href");
+            assert href != null;
             boolean httpResponse = mainpage.tryHttpRequest(href);
             if (!httpResponse) {
                 failedLinks.add(href);
@@ -99,7 +100,6 @@ public class TestBasePage {
             logger.error("Failed links:");
             for (String link : failedLinks) {
                 System.out.println(link);
-                logger.error("Failed link: {}", link);
             }
             logger.error("Some links did not return a 200 response code.");
             Assert.fail("Some links did not return a 200 response code.");
