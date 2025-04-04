@@ -141,17 +141,17 @@ public class BasePage {
             // Handle redirects
             if (responseCode >= 300 && responseCode < 400) {
                 String location = connection.getHeaderField("Location");
-                System.out.println("Redirect detected to: " + location);
+                System.out.println("Redirect to: " + location);
                 // Resolve relative URL
-                if (location != null && !location.startsWith("http")) {
-                    location = new URL(new URL(currentUrl), location).toString();
+                if (location != null) {
+                    location = location.startsWith("http") ? location : new URL(new URL(currentUrl), location).toString();
                     return tryHttpRequest(location); // Retry with the new URL
                 }
             }
 
-            boolean isSuccess = responseCode == HttpURLConnection.HTTP_OK;
-            System.out.println(isSuccess ? "SUCCESS" : "FAILURE");
-            return isSuccess;
+            boolean success = responseCode == HttpURLConnection.HTTP_OK;
+            System.out.println(success ? "SUCCESS" : "FAILURE");
+            return success;
 
         } catch (IOException e) {
             System.out.println("Exception encountered for URL: " + currentUrl);
