@@ -22,6 +22,12 @@ public class LoginPage extends BasePage {
         return b;
     }
     public boolean performLogin(String user, String pswd) {
+        wait.until(driver -> {
+            Object isLoaded = ((JavascriptExecutor) driver).executeScript(
+                    "return arguments[0].complete && arguments[0].naturalWidth > 0;", driver.findElement(anchor)
+            );
+            return isLoaded != null && (boolean) isLoaded;
+        });
         if (isElementPresent(cabinet)) {if (Config.debug) System.out.println("Already logged in"); return true;}
         do {
             if (!isElementPresent(loginLogo)) openLoginPage();
@@ -41,7 +47,6 @@ public class LoginPage extends BasePage {
         }
         driver.findElement(user).sendKeys(username);
         driver.findElement(pswd).sendKeys(password);
-        wait.until(ExpectedConditions.visibilityOfElementLocated(loginWin));
         driver.findElement(loginWin).click();
         if (isElementPresent(p_error)) driver.findElement(loginWin).click();
         wait.until(ExpectedConditions.invisibilityOfElementLocated(loginWin));
