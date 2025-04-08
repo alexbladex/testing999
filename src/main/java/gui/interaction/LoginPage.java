@@ -23,8 +23,9 @@ public class LoginPage extends BasePage {
     }
     public boolean performLogin(String user, String pswd) {
         wait.until(driver -> {
+            WebElement img = driver.findElement(anchor);  // Find the image element fresh each time
             Object isLoaded = ((JavascriptExecutor) driver).executeScript(
-                    "return arguments[0].complete && arguments[0].naturalWidth > 0;", driver.findElement(anchor)
+                    "return arguments[0].complete && arguments[0].naturalWidth > 0;", img
             );
             return isLoaded != null && (boolean) isLoaded;
         });

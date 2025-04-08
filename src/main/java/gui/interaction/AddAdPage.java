@@ -14,21 +14,22 @@ public class AddAdPage extends LoggedInPage {
     By items = By.xpath("//a[@href='/cabinet/items']");
     By offer_sell = By.xpath("//input[@value='776' and @type='radio']");
     By offer_buy = By.xpath("//input[@value='777' and @type='radio']");
-    By title_id = By.xpath("//input[@id='control_12']");
-    By desc_id = By.xpath("//textarea[@id='control_13']");
-    By price_id = By.xpath("//input[@id='control_2']");
-    By price_type = By.xpath("//select[@name='2_unit']");
-    By my_phone = By.xpath("//input[@id='phone_37379169100']");
-    By other_phone = By.xpath("//input[@id='phone_37379544975']");
+    By title_id = By.xpath("//input[contains(@name, '#12.value')]");
+    By desc_id = By.xpath("//textarea[contains(@name, '#13.value')]");
+    By price_id = By.xpath("//input[contains(@name, '#2.value')]");
+    By price_type = By.xpath("//select[contains(@name, '#2.value')]");
+    By my_phone = By.xpath("(//input[contains(@id, 'phone')])[1]");
+    By other_phone = By.xpath("(//input[contains(@id, 'phone')])[2]");
     By img_id = By.xpath("//section[@id='filupload-media-container']/figure/a/img");
     By agree = By.xpath("//input[@id='agreement']");
-    By submit = By.xpath("//div[@class='grid_11']/button[@type='submit']");
+    By submit = By.xpath("(//form//button[@type='submit'])[2]");
     By error_hint_h = By.xpath("//*[contains(@id, 'error') or contains(@class, 'error')]");
     By payment_h = By.xpath("//form[@id='js-product-payment']/h1");
     By payment_id = By.xpath("//link[@rel='alternate']"); ////meta[@property='og:url']
     By success_h = By.xpath("//div[contains(@class, 'success')]/h2/i[contains(@class, 'success')]");
     By success_id = By.xpath("//div[contains(@class, 'success')]/p/a[contains(@href, 'success')]");
     By limba_tooltip = By.xpath("//div[contains(@class, 'introjs')]//a[contains(@class, 'skipbutton')]");
+    By overlay = By.xpath("(//div[contains(@class, 'tooltip')])[3]");
 
     public AdItem addDefaultAd() {
         AdTemplate temp = new AdTemplate();
@@ -93,17 +94,20 @@ public class AddAdPage extends LoggedInPage {
         boolean myads = data.optBoolean("my", false);
         JSONArray imgArray = data.optJSONArray("img");
         JSONObject controls = data.optJSONObject("c");
+        imgArray.toList().forEach(System.out::println);
+        controls.keySet().forEach(System.out::println);
 
         if (skip_item) return new AdItem(null, null, null, null);
         driver.get(uri);
-        wait.until(ExpectedConditions.visibilityOfElementLocated(agree));
-        if (isElementPresent(limba_tooltip)) {
-            driver.findElement(limba_tooltip).click();
+        WebElement agreeCheckbox = wait.until(ExpectedConditions.visibilityOfElementLocated(agree));
+        if (isElementVisible(limba_tooltip)) {
+            driver.findElement(limba_tooltip).click(); // Попытка кликнуть по элементу
         }
         System.out.println(title);
-        if (offer.equals("sell")) { driver.findElement(offer_sell).click(); }
-        else { driver.findElement(offer_buy).click(); }
-        WebElement agreeCheckbox = wait.until(ExpectedConditions.visibilityOfElementLocated(agree));
+        wait.until(ExpectedConditions.elementToBeClickable(
+                offer.equals("sell") ? offer_sell : offer_buy
+        )).click();
+
         driver.findElement(title_id).sendKeys(title);
         driver.findElement(desc_id).sendKeys(desc);
         driver.findElement(price_id).sendKeys(price);
@@ -123,7 +127,7 @@ public class AddAdPage extends LoggedInPage {
         }
 
         if (imgArray != null) {
-            WebElement fileUpload = driver.findElement(By.id("fileupload-file-input"));
+            WebElement fileUpload = driver.findElement(By.id("upload-photo"));
             for (int i = 0; i < imgArray.length(); i++) {
                 String relativePath = "images/" + imgArray.getString(i);
                 String absolutePath = new File(relativePath).getAbsolutePath();
@@ -205,7 +209,7 @@ public class AddAdPage extends LoggedInPage {
                 .replaceAll("^.*?md.*?(\\d+).*$", "$1"));
     }
     private void control(String id, String val) {
-        WebElement element = driver.findElement(By.id(id));
+        WebElement element = driver.findElement(By.name(id));
         if (element.getTagName().equals("select")) {
             selectDropdown(element, val);
         } else if (element.getTagName().equals("input") && element.getAttribute("type").equals("text")) {
