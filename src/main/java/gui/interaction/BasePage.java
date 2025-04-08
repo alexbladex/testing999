@@ -52,6 +52,10 @@ public class BasePage {
         wait.until(ExpectedConditions.visibilityOfElementLocated(element));
         ((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView(true);", driver.findElement(element));
     }
+    protected void clickTo(WebElement element) {
+        wait.until(ExpectedConditions.visibilityOf(element));
+        ((JavascriptExecutor)driver).executeScript("arguments[0].click();", element);
+    }
     public boolean isCabinetDisplayed(){
         boolean b = isElementVisible(cabinet);
         if (Config.debug) System.out.println("Personal Cabinet is visible: " + b);

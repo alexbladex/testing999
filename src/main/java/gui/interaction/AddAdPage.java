@@ -3,7 +3,6 @@ package gui.interaction;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -28,9 +27,10 @@ public class AddAdPage extends LoggedInPage {
     By payment_h = By.xpath("//form[@id='js-product-payment']/h1");
     By payment_id = By.xpath("//link[@rel='alternate']"); ////meta[@property='og:url']
     By success_h = By.xpath("//div[contains(@class, 'success')]/h2/i[contains(@class, 'success')]");
-    By success_id = By.xpath("//div[contains(@class, 'success')]/p/a[contains(@href, 'success')]");
+    By success_id = By.xpath("//div[contains(@class, 'success')]/a[contains(@href, 'success')]");
     By limba_tooltip = By.xpath("//div[contains(@class, 'introjs')]//a[contains(@class, 'skipbutton')]");
     By overlay = By.xpath("(//div[contains(@class, 'tooltip')])[3]");
+    By agree_error = By.xpath("//p[contains(@class, 'styles_agreement')]");
 
     public AdItem addDefaultAd() {
         AdTemplate temp = new AdTemplate();
@@ -154,16 +154,17 @@ public class AddAdPage extends LoggedInPage {
 
         if (myads) {
             WebElement other = driver.findElement(other_phone);
-            if (other.isSelected()) ((JavascriptExecutor) driver).executeScript("arguments[0].click();", other);
+            if (other.isSelected()) clickTo(other);
         } else {
             WebElement my = driver.findElement(my_phone);
-            if (my.isSelected()) ((JavascriptExecutor) driver).executeScript("arguments[0].click();", my);
+            if (my.isSelected()) clickTo(my);
         }
 
-        agreeCheckbox.click();
+        scrollTo(agree);
+        clickTo(agreeCheckbox);
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(agree_error));
         WebElement buttonSubmit = driver.findElement(submit);
-        wait.until(ExpectedConditions.attributeToBe(submit, "disabled", null));
-        buttonSubmit.click();
+        clickTo(buttonSubmit);
         System.out.println("Submitted");
         wait.until(ExpectedConditions.stalenessOf(buttonSubmit));
         Integer id = null;
@@ -207,7 +208,7 @@ public class AddAdPage extends LoggedInPage {
     private Integer getItemIdBy(By element) {
         return Integer.parseInt(driver.findElement(element)
                 .getAttribute("href")
-                .replaceAll("^.*?md.*?(\\d+).*$", "$1"));
+                .replaceAll("^.*?(\\d+).*$", "$1"));
     }
     private void control(String id, String val) {
         WebElement element = driver.findElement(By.name(id));
