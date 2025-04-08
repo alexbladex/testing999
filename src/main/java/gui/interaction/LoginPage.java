@@ -23,6 +23,11 @@ public class LoginPage extends BasePage {
     }
     public boolean performLogin(String user, String pswd) {
         wait.until(driver -> {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // Восстанавливаем флаг прерывания потока
+            }
             WebElement img = driver.findElement(anchor);  // Find the image element fresh each time
             Object isLoaded = ((JavascriptExecutor) driver).executeScript(
                     "return arguments[0].complete && arguments[0].naturalWidth > 0;", img

@@ -110,6 +110,15 @@ public class BasePage {
             return false;
         }
     }
+    protected boolean isElementVisible(By element, int timeout) {
+        try {
+            WebDriverWait waitT = new WebDriverWait(driver, Duration.ofSeconds(timeout));
+            waitT.until(ExpectedConditions.visibilityOfElementLocated(element));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
     protected void initializeSelect(WebElement element) {
         this.select = new Select(element);
     }

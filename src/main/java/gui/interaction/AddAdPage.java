@@ -3,6 +3,7 @@ package gui.interaction;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -20,7 +21,7 @@ public class AddAdPage extends LoggedInPage {
     By price_type = By.xpath("//select[contains(@name, '#2.value')]");
     By my_phone = By.xpath("(//input[contains(@id, 'phone')])[1]");
     By other_phone = By.xpath("(//input[contains(@id, 'phone')])[2]");
-    By img_id = By.xpath("//section[@id='filupload-media-container']/figure/a/img");
+    By img_id = By.xpath("//div[@data-fancybox='gallery']/img");
     By agree = By.xpath("//input[@id='agreement']");
     By submit = By.xpath("(//form//button[@type='submit'])[2]");
     By error_hint_h = By.xpath("//*[contains(@id, 'error') or contains(@class, 'error')]");
@@ -94,13 +95,13 @@ public class AddAdPage extends LoggedInPage {
         boolean myads = data.optBoolean("my", false);
         JSONArray imgArray = data.optJSONArray("img");
         JSONObject controls = data.optJSONObject("c");
-        imgArray.toList().forEach(System.out::println);
-        controls.keySet().forEach(System.out::println);
+//        imgArray.toList().forEach(System.out::println);
+//        controls.keySet().forEach(System.out::println);
 
         if (skip_item) return new AdItem(null, null, null, null);
         driver.get(uri);
         WebElement agreeCheckbox = wait.until(ExpectedConditions.visibilityOfElementLocated(agree));
-        if (isElementVisible(limba_tooltip)) {
+        if (isElementVisible(limba_tooltip,3)) {
             driver.findElement(limba_tooltip).click(); // Попытка кликнуть по элементу
         }
         System.out.println(title);
@@ -153,10 +154,10 @@ public class AddAdPage extends LoggedInPage {
 
         if (myads) {
             WebElement other = driver.findElement(other_phone);
-            if (other.isSelected()) other.click();
+            if (other.isSelected()) ((JavascriptExecutor) driver).executeScript("arguments[0].click();", other);
         } else {
             WebElement my = driver.findElement(my_phone);
-            if (my.isSelected()) my.click();
+            if (my.isSelected()) ((JavascriptExecutor) driver).executeScript("arguments[0].click();", my);
         }
 
         agreeCheckbox.click();
