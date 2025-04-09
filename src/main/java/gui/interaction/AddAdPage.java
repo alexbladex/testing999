@@ -24,8 +24,8 @@ public class AddAdPage extends LoggedInPage {
     By agree = By.xpath("//input[@id='agreement']");
     By submit = By.xpath("(//form//button[@type='submit'])[2]");
     By error_hint_h = By.xpath("//*[contains(@id, 'error') or contains(@class, 'error')]");
-    By payment_h = By.xpath("//form[@id='js-product-payment']/h1");
-    By payment_id = By.xpath("//link[@rel='alternate']"); ////meta[@property='og:url']
+    By payment_h = By.xpath("//h1[contains(@class, 'payment')]");
+    By payment_id = By.xpath("//span/a[contains(@class, 'header')]"); ////meta[@property='og:url']
     By success_h = By.xpath("//div[contains(@class, 'success')]/h2/i[contains(@class, 'success')]");
     By success_id = By.xpath("//div[contains(@class, 'success')]/a[contains(@href, 'success')]");
     By limba_tooltip = By.xpath("//div[contains(@class, 'introjs')]//a[contains(@class, 'skipbutton')]");
@@ -208,7 +208,7 @@ public class AddAdPage extends LoggedInPage {
     private Integer getItemIdBy(By element) {
         return Integer.parseInt(driver.findElement(element)
                 .getAttribute("href")
-                .replaceAll("^.*?(\\d+).*$", "$1"));
+                .replaceAll("^.*?\\/(\\d+)\\/.*$", "$1"));
     }
     private void control(String id, String val) {
         WebElement element = driver.findElement(By.name(id));
