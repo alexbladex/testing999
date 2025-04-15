@@ -9,10 +9,10 @@ import java.util.List;
 
 public class DelAdPage extends AddAdPage {
     String summaryTemplate = "//a[contains(text(), '%s')]";
-    String itemTemplate = "//input[@value='%s']";
-    By page_qty = By.xpath("//nav[@class='paginator cf']/ul/li/a");
-    By delete = By.xpath("//a[contains(@class, 'js-multi-delete')]");
-    By agree = By.xpath("//button[contains(@data-form-action, 'multiple_remove')]");
+    String itemTemplate = "//a[contains(@href, '%s')]";
+    By page_qty = By.xpath("//a[contains(@class, 'pagination')]//button[@data-test-page-value]");
+    By delete = By.xpath("//i[contains(@data-test-id, 'multiactions-delete')]");
+    By agree = By.xpath("(//footer/button[contains(@data-sentry-element, 'Button')])[2]");
     By anchor = By.xpath("//form/table/tbody[@id='js-cabinet-items-list']");
     String uri = "https://999.md/cabinet/items";
     int deletedAds = 0;
@@ -147,7 +147,10 @@ public class DelAdPage extends AddAdPage {
     public boolean delLastItemById(Integer id){
         if (!driver.getCurrentUrl().contains("items")) driver.get(uri);
         System.out.print(id + " ");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(getItem(id.toString()))).click();
+        WebElement addLink = wait.until(ExpectedConditions.visibilityOfElementLocated(getItem(id.toString())));
+        WebElement row = addLink.findElement(By.xpath("./ancestor::tr"));
+        WebElement checkbox = row.findElement(By.xpath("./td[1]//input[@type='checkbox']"));
+        clickTo(checkbox);
         return performDelete();
     }
     private By getSummary(String itemSummary) {
@@ -158,6 +161,7 @@ public class DelAdPage extends AddAdPage {
     }
     public Integer getIdByTitle(String title) {
         if (!driver.getCurrentUrl().contains("items")) driver.get(uri);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(page_qty));
         List<WebElement> elements = driver.findElements(getSummary(title));
         if (elements.isEmpty()) return null;
         WebElement itemForSale = elements.get(0);

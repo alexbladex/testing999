@@ -21,7 +21,7 @@ public class BasePage {
     protected Actions actions;
     protected Select select;
     protected static BasePage currentPage;
-    By anchor = By.xpath("//*[@data-sentry-component='SidebarBanners']//img");
+    By anchor = By.xpath("(//a[@data-test-id='recommended-item']//img)[1]");
     By frame = By.xpath("//iframe[@id='topbar-panel']");
     By script_topbar = By.xpath("//script [@id='topbar']");
     By buttonLang = By.xpath("//div[@data-sentry-component='ChangeLangButton']/div[1]/div[1]");
