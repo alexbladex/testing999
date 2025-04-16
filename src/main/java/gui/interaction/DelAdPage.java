@@ -13,7 +13,7 @@ public class DelAdPage extends AddAdPage {
     By page_qty = By.xpath("//a[contains(@class, 'pagination')]//button[@data-test-page-value]");
     By delete = By.xpath("//i[contains(@data-test-id, 'multiactions-delete')]");
     By agree = By.xpath("(//footer/button[contains(@data-sentry-element, 'Button')])[2]");
-    By anchor = By.xpath("//form/table/tbody[@id='js-cabinet-items-list']");
+    By anchor = By.xpath("//div[@data-sentry-component='CabinetItemsViewDesktop']//table");
     String uri = "https://999.md/cabinet/items";
     int deletedAds = 0;
     public DelAdPage(WebDriver driver) {
@@ -22,7 +22,7 @@ public class DelAdPage extends AddAdPage {
     }
     private int delSelectedItems(String[] itemsArray, int item_qty, final DataAdItemState state){
         if (!driver.getCurrentUrl().contains("items")) driver.get(uri);
-        wait.until(ExpectedConditions.visibilityOfElementLocated(anchor));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(page_qty));
         for (String itemSummary : itemsArray) {
             System.out.println("Search: " + itemSummary);
             int currentPage = 0;
@@ -30,7 +30,7 @@ public class DelAdPage extends AddAdPage {
             do {
                 if (item_qty == 0) break;
                 if (paginators.size() > 0) {
-                    paginators.get(currentPage).click();
+                    clickTo(paginators.get(currentPage));
                     wait.until(ExpectedConditions.stalenessOf(paginators.get(currentPage)));
                     System.out.println("Opening next page");
                 }
