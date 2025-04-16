@@ -9,6 +9,7 @@ allure-report/
 !**/src/test/**/target/
 .mvn/
 .idea/
+.allure/
 config.properties
 config.json
 
