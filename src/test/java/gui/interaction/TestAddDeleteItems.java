@@ -69,7 +69,7 @@ public class TestAddDeleteItems {
         String[][] testData = {{ "размер" }};
         return testData;
     }
-    @Test(enabled = true, groups = "requiresLogin", retryAnalyzer = RetryAnalyzer.class, dataProvider = "ItemsToBeDeleted", dependsOnMethods = "testAddAdData")
+    @Test(enabled = true, groups = "requiresLogin", retryAnalyzer = RetryAnalyzer.class, dataProvider = "ItemsToBeDeleted")
     public void testDelAllInactiveItemsFromDataProvider(String itemsSummary) {
         // this is methods depends on testAddAdData()
         // it is assumed that there are at least 9 ads in the marketplace with an inactive status
@@ -79,7 +79,7 @@ public class TestAddDeleteItems {
         int i = itempage.delInactiveItems(itemsSummary);
         Assert.assertTrue(i >= 4, "Not all ads successfully deleted from the marketplace");
     }
-    @Test(enabled = true, groups = "requiresLogin", retryAnalyzer = RetryAnalyzer.class)
+    @Test(enabled = true, groups = "requiresLogin", retryAnalyzer = RetryAnalyzer.class, dependsOnMethods = "testAddAdData")
     public void testDelAllInactiveItems() {
         // this is methods depends on TestNG Context
         @SuppressWarnings("unchecked")
