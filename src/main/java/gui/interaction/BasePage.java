@@ -52,6 +52,12 @@ public class BasePage {
         wait.until(ExpectedConditions.visibilityOfElementLocated(element));
         ((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView(true);", driver.findElement(element));
     }
+    protected void scrollTo(WebElement element) {
+        wait.until(ExpectedConditions.visibilityOf(element));
+        ((JavascriptExecutor)driver).executeScript(
+                "arguments[0].scrollIntoView({behavior: 'auto', block: 'center', inline: 'center'});", element
+        );
+    }
     protected void clickTo(WebElement element) {
         wait.until(ExpectedConditions.visibilityOf(element));
         ((JavascriptExecutor)driver).executeScript("arguments[0].click();", element);
@@ -88,8 +94,9 @@ public class BasePage {
         if (Config.debug) System.out.println("Current lang: " + lang);
         if (!newLang.getCode().equals(lang)) {
 //            mouseOver(buttonLang);
+            scrollTo(button);
             button.click();
-            wait.until(ExpectedConditions.visibilityOf(secondButton));
+            scrollTo(secondButton);
             secondButton.click();
             wait.until(ExpectedConditions.invisibilityOf(secondButton));
             wait.until(ExpectedConditions.attributeToBe(activeLang, "lang", newLang.getCode()));
@@ -142,9 +149,12 @@ public class BasePage {
     public boolean tryHttpRequest(String currentUrl) {
         if (!currentUrl.startsWith("http")) return true; // Skip non-HTTP URLs
         try {
-            System.out.println("Starting HTTP request for URL: " + currentUrl);
+            URL url = new URL(currentUrl);
+            if (!url.getHost().endsWith("999.md")) return true; // Skipping non-999.md URL
+            if (url.getPath().equals("/") || url.getPath().isEmpty()) return true; // URL is just the domain with a trailing slash
 
-            HttpURLConnection connection = (HttpURLConnection) new URL(currentUrl).openConnection();
+            System.out.println("Starting HTTP request for URL: " + currentUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setInstanceFollowRedirects(true);
             connection.setRequestMethod("GET");
             connection.connect();

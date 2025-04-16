@@ -39,7 +39,12 @@ public class TestBasePage {
     //@Parameters("baseURL")
     @BeforeMethod
     public void initMainPage() {
-        driver.get(uri);
+        if (driver != null) {
+            driver.manage().deleteAllCookies();
+            driver.get(uri);
+        } else {
+            throw new IllegalStateException("WebDriver instance is not initialized");
+        }
         logger.info("Navigated to URL: {}", uri);
     }
     @AfterMethod
