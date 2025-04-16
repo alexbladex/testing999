@@ -3,15 +3,17 @@ images/
 screenshot/
 target/
 test-output/
-allure-results/
-allure-report/
 !**/src/main/**/target/
 !**/src/test/**/target/
 .mvn/
 .idea/
-.allure/
 config.properties
 config.json
+
+### Allure ###
+allure-results/
+allure-report/
+.allure/
 
 ### IntelliJ IDEA ###
 *.iws
