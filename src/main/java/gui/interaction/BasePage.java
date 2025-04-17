@@ -22,8 +22,8 @@ public class BasePage {
     protected Select select;
     protected static BasePage currentPage;
     By anchor = By.xpath("(//a[@data-test-id='recommended-item']//img)[1]");
-    By frame = By.xpath("//iframe[@id='topbar-panel']");
-    By script_topbar = By.xpath("//script [@id='topbar']");
+    By frame = By.xpath("");
+    By script_topbar = By.xpath("");
     By buttonLang = By.xpath("//div[@data-sentry-component='ChangeLangButton']/div[1]/div[1]");
     By buttonRu = By.xpath("//button[@data-lang='ru']");
     By buttonRo = By.xpath("//button[@data-lang='ro']");

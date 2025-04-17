@@ -31,13 +31,15 @@ public class DelAdPage extends AddAdPage {
                 if (item_qty == 0) break;
                 if (paginators.size() > 0) {
                     clickTo(paginators.get(currentPage));
-                    wait.until(ExpectedConditions.stalenessOf(paginators.get(currentPage)));
+                    wait.until(ExpectedConditions.attributeContains(
+                            paginators.get(currentPage), "class", "active"
+                    ));
                     System.out.println("Opening next page");
                 }
-                WebElement frameElement = driver.findElement(frame);
-                ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('style', 'display:none');", frameElement);
-                frameElement = driver.findElement(script_topbar);
-                ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('style', 'display: none;');", frameElement);
+//                WebElement frameElement = driver.findElement(frame);
+//                ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('style', 'display:none');", frameElement);
+//                frameElement = driver.findElement(script_topbar);
+//                ((JavascriptExecutor) driver).executeScript("arguments[0].setAttribute('style', 'display: none;');", frameElement);
 
                 do {
                     if (item_qty == 0) break;
@@ -45,28 +47,13 @@ public class DelAdPage extends AddAdPage {
                     List<WebElement> itemsForSale = driver.findElements(getSummary(itemSummary));
                     for (WebElement itemForSale : itemsForSale) {
                         if (item_qty == 0) break;
-                        WebElement trElement = itemForSale.findElement(By.xpath("./ancestor::tr"));
-                        String itemState = trElement.getAttribute("data-test-item-state");
-                        System.out.println(itemState);
-                        String itemNumber = itemForSale.getAttribute("href").replaceAll("^.*?md.*?(\\d+).*$", "$1"); // https://999.md/ru/87800316
-                        System.out.println(itemNumber);
-                        WebElement inputElement = trElement.findElement(By.xpath(".//td//input"));
+                        AdInfo adInfo = getItemInfo(itemForSale);
+                        boolean itemBlocked = adInfo.isBlocked;
+                        System.out.println(adInfo.itemNumber + " is: " + (itemBlocked ? "disabled" : "active"));
 
-                        boolean shouldClick = true;
-                        switch (state) {
-                            case DISABLED:
-                                if (itemState.equals("public")) {
-                                    shouldClick = false;
-                                }
-                                break;
-                            case ACTIVE:
-                                if (itemState.matches("need_pay|expired|blocked")) {
-                                    shouldClick = false;
-                                }
-                                break;
-                        }
+                        boolean shouldClick = state == DataAdItemState.ALL || (state == DataAdItemState.DISABLED) == itemBlocked;
                         if (shouldClick) {
-                            wait.until(ExpectedConditions.visibilityOf(inputElement)).click(); //visibilityOfElementLocated(getItem(itemNumber))
+                            clickTo(adInfo.checkBox);
                             checked++;
                         }
                         item_qty--;
@@ -87,30 +74,28 @@ public class DelAdPage extends AddAdPage {
             return true;
         }
         for (WebElement itemForSale : itemsForSale) {
-            WebElement trElement = itemForSale.findElement(By.xpath("./ancestor::tr"));
-            String itemState = trElement.getAttribute("data-test-item-state");
-            switch (state) {
-                case DISABLED:
-                    if (itemState.matches("need_pay|expired|blocked")) return true;
-                    break;
-                case ACTIVE:
-                    if (itemState.equals("public")) return true;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unexpected state: " + state);
+            AdInfo adInfo = getItemInfo(itemForSale);
+            boolean itemBlocked = adInfo.isBlocked;
+            if (state == DataAdItemState.DISABLED) {
+                return itemBlocked;
             }
+            if (state == DataAdItemState.ACTIVE) {
+                return !itemBlocked;
+            }
+            throw new IllegalArgumentException("Unexpected state: " + state);
         }
         return false;
     }
     private boolean performDelete() {
         System.out.println("trying delete");
-        WebElement delButton = driver.findElement(delete);
-        if (!delButton.isDisplayed()) return true;
+        List<WebElement> delButtons = driver.findElements(delete);
+        if (delButtons.isEmpty()) return true;
         try {
-            delButton.click();
+            scrollTo(delButtons.get(0));
+            clickTo(delButtons.get(0));
             Thread.sleep(100);
             driver.findElement(agree).click();
-            wait.until(ExpectedConditions.invisibilityOf(delButton));
+            wait.until(ExpectedConditions.invisibilityOf(delButtons.get(0)));
             Thread.sleep(1000);
 //            driver.navigate().refresh();
             System.out.println("deleted.");
@@ -147,10 +132,9 @@ public class DelAdPage extends AddAdPage {
     public boolean delLastItemById(Integer id){
         if (!driver.getCurrentUrl().contains("items")) driver.get(uri);
         System.out.print(id + " ");
-        WebElement addLink = wait.until(ExpectedConditions.visibilityOfElementLocated(getItem(id.toString())));
-        WebElement row = addLink.findElement(By.xpath("./ancestor::tr"));
-        WebElement checkbox = row.findElement(By.xpath("./td[1]//input[@type='checkbox']"));
-        clickTo(checkbox);
+        WebElement itemForSale = wait.until(ExpectedConditions.visibilityOfElementLocated(getItem(id.toString())));
+        AdInfo adInfo = getItemInfo(itemForSale);
+        clickTo(adInfo.checkBox);
         return performDelete();
     }
     private By getSummary(String itemSummary) {
@@ -164,11 +148,17 @@ public class DelAdPage extends AddAdPage {
         wait.until(ExpectedConditions.visibilityOfElementLocated(page_qty));
         List<WebElement> elements = driver.findElements(getSummary(title));
         if (elements.isEmpty()) return null;
-        WebElement itemForSale = elements.get(0);
-        int i = Integer.parseInt(itemForSale.getAttribute("href")
-                .replaceAll("^.*?md.*?(\\d+).*$", "$1"));
-        System.out.println("getIdByTitle return: " + i);
-        return i;
+        AdInfo adInfo = getItemInfo(elements.get(0));
+        System.out.println("getIdByTitle return: " + adInfo.itemNumber);
+        return adInfo.itemNumber;
+    }
+    public AdInfo getItemInfo(WebElement itemForSale) {
+        int itemNumber = Integer.parseInt(itemForSale.getAttribute("href")
+                .replaceAll("^.*?(?:\\/|^)(\\d+)(?:\\/|$).*$", "$1"));
+        WebElement trElement = itemForSale.findElement(By.xpath("./ancestor::tr"));
+        boolean isBlocked = trElement.getAttribute("class").contains("styles_blocked");
+        WebElement checkBox = trElement.findElement(By.xpath("./td[1]//input[@type='checkbox']"));
+        return new AdInfo(isBlocked, itemNumber, checkBox);
     }
     public void selectDropdown(WebElement dropdown, String value) {
         initializeSelect(dropdown);
@@ -179,6 +169,17 @@ public class DelAdPage extends AddAdPage {
     @Override
     public void setAnchor(By anchor) {
         this.anchor = anchor;
+    }
+}
+class AdInfo {
+    public boolean isBlocked;
+    public int itemNumber;
+    public WebElement checkBox;
+
+    public AdInfo(boolean isBlocked, int itemNumber, WebElement checkBox) {
+        this.isBlocked = isBlocked;
+        this.itemNumber = itemNumber;
+        this.checkBox = checkBox;
     }
 }
 enum DataAdItemState {
