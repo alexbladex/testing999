@@ -15,8 +15,8 @@
             <class name="gui.interaction.TestItemsPage"/>
         </classes>
     </test>
-    <test name="Test2Page">
-        <!--<method-selectors>
+    <!--<test name="Test2Page">
+        <method-selectors>
             <method-selector>
                 <script language="beanshell">
                     <![CDATA[
@@ -32,8 +32,8 @@
         <!--<classes>
             <class name="gui.interaction.TestBasePage"/>
             <class name="gui.interaction.TestItemsPage"/>
-        </classes>-->
-    </test>
+        </classes>
+    </test>-->
     <listeners>
         <listener class-name="gui.interaction.EventListener"/>
     </listeners>
