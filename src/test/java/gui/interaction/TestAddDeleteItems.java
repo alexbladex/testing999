@@ -69,25 +69,24 @@ public class TestAddDeleteItems {
         String[][] testData = {{ "размер" }};
         return testData;
     }
-    @Test(enabled = true, groups = "requiresLogin", retryAnalyzer = RetryAnalyzer.class, dataProvider = "ItemsToBeDeleted")
+    @Test(enabled = true, groups = "requiresLogin", retryAnalyzer = RetryAnalyzer.class, dataProvider = "ItemsToBeDeleted", dependsOnMethods = "testDelAllInactiveItems")
     public void testDelAllInactiveItemsFromDataProvider(String itemsSummary) {
         // this is methods depends on testAddAdData()
         // it is assumed that there are at least 9 ads in the marketplace with an inactive status
         // make sure that the title of the ads created in the testAddAdData method contains the keyword from dataProvider
         // for example, when creating an ad via addDefaultAd() with the title Toyota, make sure that the same word is exist in the dataProvider
         DelAdPage itempage = new DelAdPage(driver);
-        int i = itempage.delInactiveItems(itemsSummary);
+        int i = itempage.delInactiveItems(itemsSummary, 5);
         Assert.assertTrue(i >= 4, "Not all ads successfully deleted from the marketplace");
     }
     @Test(enabled = true, groups = "requiresLogin", retryAnalyzer = RetryAnalyzer.class, dependsOnMethods = "testAddAdData")
     public void testDelAllInactiveItems() {
         // this is methods depends on TestNG Context
         @SuppressWarnings("unchecked")
-        String[] titlesToDelete = (String[]) getTestContext()
-                .getAttribute("createdAdTitles");
+        String[] titlesToDelete = (String[]) getTestContext().getAttribute("createdAdTitles");
 
         DelAdPage itempage = new DelAdPage(driver);
-        int i = itempage.delAllInactiveItems(titlesToDelete);
+        int i = itempage.delAllInactiveItems(titlesToDelete, 5);
         Assert.assertTrue(i >= 4, "Not all ads successfully deleted from the marketplace");
     }
     @Test(enabled = true, groups = "requiresLogin", retryAnalyzer = RetryAnalyzer.class)
@@ -96,7 +95,7 @@ public class TestAddDeleteItems {
         AddAdPage itempage = new AddAdPage(driver);
         int inactive = 0;
         Set<String> createdTitles = new HashSet<>();
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             AdItem ad = itempage.addDefaultAd();
             createdTitles.add(ad.getTitle());
             if (ad.getStatus().matches("need_pay|expired|blocked")) inactive++;

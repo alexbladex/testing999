@@ -108,8 +108,9 @@ public class DelAdPage extends AddAdPage {
     public int delAllItems(String[] titleArray){
         return delSelectedItems(titleArray, -1, DataAdItemState.ALL); // -1: all
     }
-    public int delAllInactiveItems(String[] titleArray){
-        return delSelectedItems(titleArray, -1, DataAdItemState.DISABLED); // -1: all
+    public int delAllInactiveItems(String[] titleArray, Integer qty){
+        if (qty == null) qty = -1;
+        return delSelectedItems(titleArray, qty, DataAdItemState.DISABLED); // -1: all
     }
     public int delAllActiveItems(String[] titleArray){
         return delSelectedItems(titleArray, -1, DataAdItemState.ACTIVE); // -1: all
@@ -117,8 +118,8 @@ public class DelAdPage extends AddAdPage {
     public int delItems(String title){
         return delSelectedItems(new String[]{title}, -1, DataAdItemState.ALL); // -1: all
     }
-    public int delInactiveItems(String title){
-        return delSelectedItems(new String[]{title}, -1, DataAdItemState.DISABLED); // -1: all
+    public int delInactiveItems(String title, Integer qty){
+        return delSelectedItems(new String[]{title}, qty, DataAdItemState.DISABLED); // -1: all
     }
     public int delActiveItems(String title){
         return delSelectedItems(new String[]{title}, -1, DataAdItemState.ACTIVE); // -1: all
