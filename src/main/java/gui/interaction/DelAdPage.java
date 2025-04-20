@@ -155,7 +155,7 @@ public class DelAdPage extends AddAdPage {
     }
     public AdInfo getItemInfo(WebElement itemForSale) {
         int itemNumber = Integer.parseInt(itemForSale.getAttribute("href")
-                .replaceAll("^.*?(?:\\/|^)(\\d+)(?:\\/|$).*$", "$1"));
+                .replaceAll("^.*\\/(\\d+)\\/?$", "$1"));
         WebElement trElement = itemForSale.findElement(By.xpath("./ancestor::tr"));
         boolean isBlocked = trElement.getAttribute("class").contains("styles_blocked");
         WebElement checkBox = trElement.findElement(By.xpath("./td[1]//input[@type='checkbox']"));
