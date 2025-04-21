@@ -28,8 +28,8 @@
                 ]]>
                 </script>
             </method-selector>
-        </method-selectors>-->
-        <!--<classes>
+        </method-selectors>
+        <classes>
             <class name="gui.interaction.TestBasePage"/>
             <class name="gui.interaction.TestItemsPage"/>
         </classes>

@@ -19,14 +19,14 @@ public class TestBasePage {
 
     @Parameters({"driverProfile", "port"})
     @BeforeClass
-    public void setupTest(@Optional("local") String driverProfile, @Optional("8080") int port) throws MalformedURLException {
+    public void setupTest(@Optional("local") String driverProfile, @Optional("0") int port) throws MalformedURLException {
         uri = PropertyReader.getProperty("uri");
         user = PropertyReader.getProperty("user");
         pswd = PropertyReader.getProperty("pswd");
         if ("remote".equals(driverProfile)) {
             driver = DriverFactory.remoteInit(port);
         } else {
-            driver = DriverFactory.localInit();
+            driver = DriverFactory.localInit(port);
         }
         mainpage = new MainPage(driver, uri);
         logger.info("Test setup complete");
