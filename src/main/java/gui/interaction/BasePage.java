@@ -63,7 +63,7 @@ public class BasePage {
         ((JavascriptExecutor)driver).executeScript("arguments[0].click();", element);
     }
     public boolean isCabinetDisplayed(){
-        boolean b = isElementVisible(cabinet);
+        boolean b = isElementVisible(cabinet, 2);
         if (Config.debug) System.out.println("Personal Cabinet is visible: " + b);
         return b;
     }
@@ -121,9 +121,9 @@ public class BasePage {
             return false;
         }
     }
-    protected boolean isElementVisible(By element, int timeout) {
+    protected boolean isElementVisible(By element, int sec_timeout) {
         try {
-            WebDriverWait waitT = new WebDriverWait(driver, Duration.ofSeconds(timeout));
+            WebDriverWait waitT = new WebDriverWait(driver, Duration.ofSeconds(sec_timeout));
             waitT.until(ExpectedConditions.visibilityOfElementLocated(element));
             return true;
         } catch (Exception e) {

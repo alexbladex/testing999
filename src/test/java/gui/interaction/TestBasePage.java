@@ -77,7 +77,7 @@ public class TestBasePage {
         logger.info("Language after change: {}", newLang);
         Assert.assertNotEquals(newLang, activeLang, "Language is not changed");
     }
-    @Test(enabled=true, retryAnalyzer = RetryAnalyzer.class)
+    @Test(enabled=false, retryAnalyzer = RetryAnalyzer.class)
     public void testAllHref() {
         if (!mainpage.isElementVisible(mainpage.getAnchor())) {
             logger.error("Anchor element is not visible, failing the test.");

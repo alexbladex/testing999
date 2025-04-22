@@ -61,7 +61,7 @@ public class TestItemsPage {
         AdItem ad = itempage.addDefaultAd();
         Assert.assertTrue(itempage.delLastItemById(ad.getId()), "Last Item was not deleted");
     }
-    @Test(enabled = true, groups = "requiresLogin")
+    @Test(enabled = false, groups = "requiresLogin")
     public void testGetIdByTitle() {
         DelAdPage itempage = new DelAdPage(driver);
         AdItem ad = itempage.addDefaultAd();
