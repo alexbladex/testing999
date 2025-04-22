@@ -27,7 +27,9 @@ public class DriverFactory {
     }
     public static String createProfileDir() {
         String chromePath = Arrays.stream(System.getenv("PATH").split(";"))
-                .filter(path -> path.contains("Chrome"))
+                .map(String::trim)  // trim spaces
+                .filter(path -> !path.isEmpty())  // exclude empty string ;;
+                .filter(path -> path.toLowerCase().contains("chrome"))
                 .findFirst()
                 .orElse(null);
         if (chromePath != null) {
@@ -65,15 +67,18 @@ public class DriverFactory {
     private static WebDriver createDriver(String profilePath, int port) {
         //portable chrome name should be chrome.exe otherwise is need setBinary
         //https://support.google.com/chrome/answer/114662
-
+//        System.setProperty("webdriver.chrome.logfile", "chromedriver" + Thread.currentThread().getId() + ".log");
+//        System.setProperty("webdriver.chrome.verboseLogging", "true");
         System.setProperty("webdriver.chrome.driver", "drivers/chromedriver.exe");
+
         ChromeOptions options = new ChromeOptions();
+//        options.setBinary("d:\\Program Files\\chrome-win32\\chrome.exe");
         options.addArguments("--user-data-dir=" + profilePath);
         options.addArguments("--ignore-certificate-errors");
-//        options.addArguments("--no-default-browser-check");
-//        options.addArguments("--no-first-run");
+        options.addArguments("--no-default-browser-check");
+        options.addArguments("--no-first-run");
+        options.addArguments("--disable-extensions");
 //        options.addArguments("--enable-precise-memory-info");
-//        options.addArguments("--disable-extensions");
 //        options.addArguments("--disable-default-apps");
 //        options.addArguments("--disable-search-engine-choice-screen");
 //        options.addArguments("--disable-features=WebBluetooth,ThirdPartyCookies");
@@ -81,7 +86,9 @@ public class DriverFactory {
 //        options.addArguments("--disable-dev-shm-usage");
 //        options.addArguments("--disable-gpu"); // recommended for headless
 //        options.addArguments("--headless");
-        options.addArguments("--remote-debugging-port=" + port); //если в user-data-dir использовать родную папку профиля а не временную то non-headless режим будет работать и без debugging-port
+//        options.addArguments("--headless=new");  // Chrome 112+
+//        options.addArguments("--remote-debugging-pipe"); //instead of --remote-debugging-port
+//        options.addArguments("--remote-debugging-port=" + port); //если в user-data-dir использовать родную папку профиля а не временную то non-headless режим будет работать и без debugging-port
 
         return new ChromeDriver(options);
     }
