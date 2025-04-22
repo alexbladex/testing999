@@ -37,10 +37,16 @@ public class DriverFactory {
         }
         return chromePath;
     }
-    public static synchronized WebDriver localInit() {
-        return localInit(null);
-    }
     public static synchronized WebDriver localInit(String uri) {
+        return localInit(uri, 0);
+    }
+    public static synchronized WebDriver localInit() {
+        return localInit(null, 0);
+    }
+    public static synchronized WebDriver localInit(int port) {
+        return localInit(null, port);
+    }
+    public static synchronized WebDriver localInit(String uri, int port) {
         logger.info("Initializing WebDriver for thread: {}", Thread.currentThread().getId());
         //String id = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE).getCallerClass().getName();
         String id = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE)
@@ -50,13 +56,13 @@ public class DriverFactory {
                         .map(className -> className.substring(className.lastIndexOf('.') + 1)) // Extracting the class name
                         .findFirst()
                         .orElse("UnknownCaller"));
-        WebDriver driver = createDriver(tempProfile + id);
+        WebDriver driver = createDriver(tempProfile + id, port);
         //driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10));
         if (uri != null) driver.get(uri);
         drivers.put(Thread.currentThread(), driver);
         return driver;
     }
-    private static WebDriver createDriver(String profilePath) {
+    private static WebDriver createDriver(String profilePath, int port) {
         //portable chrome name should be chrome.exe otherwise is need setBinary
         //https://support.google.com/chrome/answer/114662
 
@@ -73,9 +79,9 @@ public class DriverFactory {
 //        options.addArguments("--disable-features=WebBluetooth,ThirdPartyCookies");
 //        options.addArguments("--disable-features=OptimizationGuideModelDownloading,OptimizationHintsFetching,OptimizationTargetPrediction,OptimizationHints");
 //        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--disable-gpu"); // Отключение GPU (рекомендуется для headless)
+//        options.addArguments("--disable-gpu"); // recommended for headless
 //        options.addArguments("--headless");
-        options.addArguments("--remote-debugging-port=9222"); //если в user-data-dir использовать родную папку профиля а не временную то non-headless режим будет работать и без debugging-port
+        options.addArguments("--remote-debugging-port=" + port); //если в user-data-dir использовать родную папку профиля а не временную то non-headless режим будет работать и без debugging-port
 
         return new ChromeDriver(options);
     }
