@@ -37,11 +37,11 @@ public class DriverFactory {
         }
         return chromePath;
     }
-    public static synchronized WebDriver localInit(String uri) {
-        return localInit(uri, 0);
-    }
     public static synchronized WebDriver localInit() {
         return localInit(null, 0);
+    }
+    public static synchronized WebDriver localInit(String uri) {
+        return localInit(uri, 0);
     }
     public static synchronized WebDriver localInit(int port) {
         return localInit(null, port);
