@@ -36,6 +36,7 @@
     </test>-->
     <listeners>
         <listener class-name="gui.interaction.EventListener"/>
+        <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
     </listeners>
 </suite>
 <!--    https://habr.com/ru/articles/121234/-->

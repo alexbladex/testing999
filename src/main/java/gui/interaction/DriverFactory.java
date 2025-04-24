@@ -79,7 +79,6 @@ public class DriverFactory {
         options.addArguments("--no-first-run");
         options.addArguments("--disable-extensions");
 //        options.addArguments("--enable-precise-memory-info");
-//        options.addArguments("--disable-default-apps");
 //        options.addArguments("--disable-search-engine-choice-screen");
 //        options.addArguments("--disable-features=WebBluetooth,ThirdPartyCookies");
 //        options.addArguments("--disable-features=OptimizationGuideModelDownloading,OptimizationHintsFetching,OptimizationTargetPrediction,OptimizationHints");
