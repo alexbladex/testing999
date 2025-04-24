@@ -1,5 +1,8 @@
 package gui.interaction;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
 import org.openqa.selenium.*;
 import org.testng.Assert;
 import org.testng.annotations.*;
@@ -53,18 +56,24 @@ public class TestBasePage {
         logger.info("Cookies cleared");
     }
     @Test
+    @Description("Test: testLangButton")
+    @Severity(SeverityLevel.NORMAL)
     public void testLangButton() {
         boolean isLanguageDisplayed = mainpage.isLanguageDisplayed();
         logger.info("Language button visibility: {}", isLanguageDisplayed);
         Assert.assertTrue(isLanguageDisplayed, "Language button is not visible");
     }
     @Test(enabled=true)
+    @Description("Test: testLoginButton")
+    @Severity(SeverityLevel.CRITICAL)
     public void testLoginButton() {
         boolean isLoginDisplayed = mainpage.isLoginDisplayed();
         logger.info("Login button visibility: {}", isLoginDisplayed);
         Assert.assertTrue(isLoginDisplayed, "Login button is not visible");
     }
     @Test
+    @Description("Test: testChangeLang")
+    @Severity(SeverityLevel.NORMAL)
     public void testChangeLang() {
         String activeLang = mainpage.currentLang();
         //mainpage.takeScreenshot();
@@ -78,6 +87,8 @@ public class TestBasePage {
         Assert.assertNotEquals(newLang, activeLang, "Language is not changed");
     }
     @Test(enabled=false, retryAnalyzer = RetryAnalyzer.class)
+    @Description("Test: testAllHref")
+    @Severity(SeverityLevel.TRIVIAL)
     public void testAllHref() {
         if (!mainpage.isElementVisible(mainpage.getAnchor())) {
             logger.error("Anchor element is not visible, failing the test.");

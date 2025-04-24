@@ -1,5 +1,8 @@
 package gui.interaction;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,11 +72,15 @@ public class TestItemsPage {
         Assert.assertEquals(id, ad.getId(), "Ad Id does not match");
     }
     @Test(retryAnalyzer = RetryAnalyzer.class)
+    @Description("Test: testLogin")
+    @Severity(SeverityLevel.NORMAL)
     public void testLogin() {
         LoginPage loginpage = new LoginPage(driver);
         Assert.assertTrue(loginpage.performLogin(user,pswd), "Login is not completed");
     }
     @Test
+    @Description("Test: tesCabinetButton")
+    @Severity(SeverityLevel.NORMAL)
     public void tesCabinetButton() {
         MainPage mainpage = new MainPage(driver);
         System.out.println("The user should be logged out");
