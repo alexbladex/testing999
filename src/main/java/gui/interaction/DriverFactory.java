@@ -35,7 +35,7 @@ public class DriverFactory {
         if (chromePath != null) {
             chromePath += "User Data/TempProfile/";
         } else {
-            chromePath = "/AppData/Local/Google/Chrome/User Data/TempProfile/";
+            chromePath = "C:/Users/Alex Buracinschi/AppData/Local/Google/Chrome/User Data/TempProfile/";
         }
         return chromePath;
     }

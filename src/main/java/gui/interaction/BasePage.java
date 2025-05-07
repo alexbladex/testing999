@@ -199,9 +199,9 @@ public class BasePage {
         String callerClass = stackTrace.getClassName();
         String callerMethod = stackTrace.getMethodName();
         callerClass = callerClass.substring(callerClass.lastIndexOf('.') + 1);
-        if (!takeScreenshot(callerClass, callerMethod)) System.out.println("Failed to create screenshot.");;
+        if (takeScreenshot(callerClass, callerMethod) == null) System.out.println("Failed to create screenshot.");;
     }
-    protected boolean takeScreenshot(String callerClass, String callerMethod) {
+    protected String takeScreenshot(String callerClass, String callerMethod) {
         // Generate timestamp
         String timestamp = new SimpleDateFormat("_yyyyMMdd_HHmmss").format(new Date());
         // Set the file path and name using the class, method, and timestamp
@@ -214,10 +214,13 @@ public class BasePage {
         // Take 'n' Save
         return ((TakesScreenshot) driver)
                 .getScreenshotAs(OutputType.FILE)
-                .renameTo(new File(filePath));
+                .renameTo(new File(filePath)) ? filePath : null;
     }
     public static BasePage getCurrentPage() {
         return currentPage;
+    }
+    public WebDriver getDriver() {
+        return driver;
     }
 }
 enum LangCode {
